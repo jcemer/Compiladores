@@ -1,0 +1,5 @@
+real:x;
+double(10:20) : tab;
+real:y ;
+
+y = 1.0;

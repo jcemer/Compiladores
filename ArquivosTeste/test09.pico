@@ -1,0 +1,7 @@
+
+if (true | false) then
+  a = 23 ; 
+else
+  a = 21 ; 
+end ;
+

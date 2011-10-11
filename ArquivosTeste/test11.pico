@@ -1,0 +1,18 @@
+if ( true ) then
+  if ( true ) then
+    if ( true ) then
+      return ;
+    end ;
+  else
+    if ( true ) then
+      if ( true ) then
+        return ;
+      end ;
+    else
+      serah_que(se_perdeu);
+    end ;
+    if ( 3 > 44 + 111.111 ) then
+      e3 = e3 ;
+    end ;
+  end ;
+end ;

@@ -1,0 +1,56 @@
+real:x;
+double(10:20, 30:10, 0:5) : tab;
+real:y ;
+char (1: 15) : a, b, c, a7s7g, aWTHGWE;
+
+
+a[33] = y[11] + qqq;
+
+737;
+
+44.32;
+
+77.33e+0;
+
+.222;
+
+variavel_nao_declarada ;
+
+1 + 1;
+
+33 / 0 ;
+
+meuproc ( .989 , meuproc2 ( tab[3, 44.787E-12, ( 111111111 / 0 ), qwerty ] ) ) ;
+
+if (! (! true | true & jin[ y[11], (1 * 0) ] <> func2( y[11] ) ) ) then 
+  a ; 23 ; xxx = func(var);
+end ;
+
+if (! (! true | true & jin[ y[11], (1 * 0) ] <> func2( y[11] ) ) ) then 
+  a ; 23 ; xxx = func(var);
+else
+  a ; 23 ; xxx = func(var);
+end ;
+
+while (! (! true | true & jin[ y[11], (1 * 0) ] <> func2( y[11] ) ) ) {
+  a ; 23 ; xxx = func(var);
+};
+
+if ( true ) then
+  if ( true ) then
+    if ( true ) then
+      return ;
+    end ;
+  else
+    if ( true ) then
+      if ( true ) then
+        return ;
+      end ;
+    else
+      serah_que(se_perdeu);
+    end ;
+    if ( 3 > 44 + 111.111 ) then
+      e3 = e3 ;
+    end ;
+  end ;
+end ;

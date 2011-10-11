@@ -1,0 +1,7 @@
+
+if (! (! true | true & jin[ y[11], (1 * 0) ] <> func2( y[11] ) ) ) then 
+  a ; 23 ; xxx = func(var);
+else
+  a ; 23 ; xxx = func(var);
+end ;
+

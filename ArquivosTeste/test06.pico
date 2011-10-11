@@ -1,0 +1,6 @@
+real:x;
+double(10:20, 30:10, 0:5) : tab;
+real: y ;
+char (1 : 15) : a, b, c, y, a7s7g, aWTHGWE ;
+
+x = 1;

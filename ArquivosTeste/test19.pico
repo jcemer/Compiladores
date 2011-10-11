@@ -1,0 +1,19 @@
+
+real: nico;
+char :stef, claudio;
+int(0:10) : array;
+int : i,  j;
+
+i=0;
+while(i<100) {
+   j=i;
+   while (j<100) {
+      if (i/2 <> 0) then
+         ctr = i/2 + j;
+         while (ctr > 0) {
+            array[ctr] = i+j;
+            ctr = ctr - 1 ;
+         };
+      end;
+   };
+};

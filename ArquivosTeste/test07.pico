@@ -1,0 +1,4 @@
+
+if (! (! true | false & true ) ) then 
+  a=0 ; 23 ; xxx = func(var);
+end ;
