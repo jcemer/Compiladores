@@ -23,25 +23,17 @@ void _error(int type){
 //create_node
 Node* create_node(int nl, Node_type t, char* lexeme, Node* child0, ...) {
 	if(t < nodo_programa && t > nodo_coringa) _error(OWIDTH);
-	int i;
-	Node * arg, * n = (Node*) malloc(sizeof(Node));
-        struct nodelist * list = NULL;
+	Node * child, * n = (Node*) malloc(sizeof(Node));
 
 	n->num_line = nl;
-	if(lexeme == NULL) {
-		n->lexeme = NULL;
-	} else {
-		n->lexeme = malloc(sizeof(char)*(strlen(lexeme) + 1));
-		strncpy(n->lexeme, lexeme, strlen(lexeme));
-		n->lexeme[strlen(lexeme)] = '\0';
-	}
+	n->lexeme = lexeme;
 	n->type = t;
+	n->children = NULL;
 
 	va_list ap;
 	va_start(ap, child0);
-	for (i = 0, arg = child0; arg != NULL; arg = va_arg(ap, Node*), i++)
-	   listadd(&list, arg);
-	n->children = list;
+	for (child = child0; child != NULL; child = va_arg(ap, Node*))
+	   listadd(&n->children, child);
 	va_end(ap);
 	return n;
 }
