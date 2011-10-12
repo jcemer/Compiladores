@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include "node.h"
+#include "list.h"
 
 Node * syntax_tree;
 
@@ -22,8 +23,9 @@ void _error(int type){
 //create_node
 Node* create_node(int nl, Node_type t, char* lexeme, Node* child0, ...) {
 	if(t < nodo_programa && t > nodo_coringa) _error(OWIDTH);
-
-	Node* n = (Node*) malloc(sizeof(Node));
+	int i;
+	Node * arg, * n = (Node*) malloc(sizeof(Node));
+        struct nodelist * list = NULL;
 
 	n->num_line = nl;
 	if(lexeme == NULL) {
@@ -35,22 +37,11 @@ Node* create_node(int nl, Node_type t, char* lexeme, Node* child0, ...) {
 	}
 	n->type = t;
 
-	// fazer implementacao de lista encadeada
 	va_list ap;
-	
-	int count, i;
-	Node* arg;
-
-	va_start(ap, child0);
-	for (count = 0, arg = child0; arg != NULL; arg = va_arg(ap, Node*), count++);
-	Node** children = (Node**) malloc(sizeof(Node*) * (count + 1));
-	va_end(ap);
-
 	va_start(ap, child0);
 	for (i = 0, arg = child0; arg != NULL; arg = va_arg(ap, Node*), i++)
-		children[i] = arg;
-	children[i] = NULL;
-	n->children = children;
+	   listadd(&list, arg);
+	n->children = list;
 	va_end(ap);
 	return n;
 }
@@ -61,10 +52,8 @@ Node* coringa(char* lexeme){
 
 //nb_of_children
 int nb_of_children(Node* n) {
-	int i;	
 	if(n == NULL) _error(ONULL);
-	for(i = 0; n->children[i] != NULL; i++);
-	return i;
+	return listlenght(&n->children);
 }
 
 //is_leaf
@@ -76,8 +65,7 @@ int is_leaf(Node* n){
 //child
 Node* child(Node* n, int i){
 	if(n == NULL) _error(ONULL);
-	if(i < 0 || i >= nb_of_children(n)) _error(OWIDTH);
-	return n->children[i];
+	return listget(&n->children, i);
 }
 
 //deep_free_node
@@ -85,7 +73,7 @@ int deep_free_node(Node* n){
 	int i;	
 	if(n != NULL){
 		for(i = 0; i < nb_of_children(n); i++)
-			deep_free_node(n->children[i]);
+			deep_free_node(child(n, i));
 		free(n);
 	}
 	return 0;
@@ -96,7 +84,7 @@ int height(Node *n){
 	int max = 0, i, h;
 	if(n != NULL){
 		for(i = 0; i < nb_of_children(n); i++){
-			h = height(n->children[i]);
+			h = height(child(n, i));
 			if(max < h)
 				max = h;
 		}

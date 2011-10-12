@@ -75,10 +75,12 @@ typedef struct _node {
    Node_type type; /**< Um dos valores definidos acima pelos # defines. */
    void* attribute;/**< Qualquer coisa por enquanto. */
    
-   struct _node **children; /*lista de filhos*/
+   struct nodelist *children; /*lista de filhos*/
 } Node;
 
 extern Node * syntax_tree;
+
+
 
 /**
  *  * Node constructor.
