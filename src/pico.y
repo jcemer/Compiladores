@@ -44,6 +44,13 @@
 %token<string> CONST
 %token<string> STR_LIT
 
+%left "+" "-"
+%left "*" "/"
+%left OR
+%left AND
+%left NOT
+
+
 %type<no> code 
 %type<no> declaracoes
 %type<no> declaracao
