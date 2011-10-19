@@ -43,6 +43,7 @@
 %token<no> STRING
 %token<string> CONST
 %token<string> STR_LIT
+%token<no> PRINTF
 
 %left "+" "-"
 %left "*" "/"
@@ -68,7 +69,6 @@
 %type<no> enunciado
 %type<no> fiminstcontrole
 %type<no> expbool
-
 
 
 %start code
@@ -271,6 +271,12 @@ expbool: TRUE {
 		$$ = create_node(@1.first_line, nodo_ne, "ne", $1, coringa("<>"), $3, NULL, NULL);
 	}
        ;
+
+enunciado: PRINTF '(' expr ')' {
+		$$ = create_node(@1.first_line, nodo_printf, "print", $3, NULL, NULL);
+	}
+		;
+
 %%
  /* A partir daqui, insere-se qlqer codigo C necessario.
   */

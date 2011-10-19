@@ -63,7 +63,8 @@
      FALSE = 279,
      STRING = 280,
      CONST = 281,
-     STR_LIT = 282
+     STR_LIT = 282,
+     PRINTF = 283
    };
 #endif
 /* Tokens.  */
@@ -92,6 +93,7 @@
 #define STRING 280
 #define CONST 281
 #define STR_LIT 282
+#define PRINTF 283
 
 
 
@@ -104,7 +106,7 @@ typedef union YYSTYPE
   char* string;
 }
 /* Line 1529 of yacc.c.  */
-#line 108 "y.tab.h"
+#line 110 "y.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

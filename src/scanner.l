@@ -64,6 +64,7 @@ while  		{return(WHILE);}
 end    		{return(END);}
 true   		{return(TRUE);}
 false  		{return(FALSE);}
+"print"   {return(PRINTF);}
 
  /* OUTROS TOKENS (IDF, CONST, STR_LIT, INT_LIT,
 	F_LIT e tratamento de espaços em branco) */

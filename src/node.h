@@ -51,6 +51,7 @@ typedef int Node_type;
 #define nodo_ne               336
 #define nodo_multiplicacao    337
 #define nodo_expressao				338
+#define nodo_printf				339
 
 #define nodo_coringa					500
 
