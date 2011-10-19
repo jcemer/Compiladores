@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include "node.h"
-#include "list.h"
+#include "nodelist.h"
 
 Node * syntax_tree;
 
