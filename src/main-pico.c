@@ -11,8 +11,7 @@ extern FILE* yyin;
 FILE *fp;
 
 
-int main(int argc, char* argv[]) 
-{
+int main(int argc, char* argv[]) {
    if (argc != 2) {
      printf("uso: %s <input_file>. Try again!\n", argv[0]);
      exit(-1);

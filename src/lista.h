@@ -67,7 +67,8 @@ struct node_tac {
 void print_tac(FILE* out, struct node_tac * code);
 
 /** Insere no fim da lista 'code' o elemento 'inst'. 
- * @param code lista (possivelmente vazia) inicial, em entrada. Na saida, contem *         a mesma lista, com mais um elemento inserido no fim.
+ * @param code lista (possivelmente vazia) inicial, em entrada. Na saida, contem 
+ *         a mesma lista, com mais um elemento inserido no fim.
  * @inst  o elemento inserido no fim da lista.
  */
 void append_inst_tac(struct node_tac ** code, struct tac * inst);
