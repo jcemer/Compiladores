@@ -63,7 +63,7 @@ void cat_tac(struct node_tac ** code_a, struct node_tac ** code_b) {
                 temp->number = i++;
             } while (temp->next);
         } else {
-           code_a = code_b;
+           *code_a = *code_b;
         }
     }
 }
