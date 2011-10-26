@@ -1,15 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "node.h"
+
 #include <string.h>
+#include "node.h"
+#include "symbol_table.h"
+#include "symbol_table.c"
+#include "lista.h"
 
 /* Programa principal do pico. */
 char* progname;
 int lineno;
 extern FILE* yyin;
 FILE *fp;
-
+symbol_t s_table;
+int desloc = 0;
 
 int main(int argc, char* argv[]) {
    if (argc != 2) {
@@ -24,16 +29,17 @@ int main(int argc, char* argv[]) {
    }
 
    progname = argv[0];
+   init_table(&s_table);
 
-   if (!yyparse()) 
+   if (!yyparse()) {
+      
+
+
       printf("OKAY.\n");
-   else 
+   } else { 
       printf("ERROR.\n");
-   /*if (syntax_tree->type == int_node) 
-     printf("A AST se limita a uma folha rotulada por: %s\n", 
-        syntax_tree->lexeme);
-   else
-     printf("Something got wrong in the AST.\n");*/
+   }
+
    fp=fopen("saida.pico", "w+");
    uncompile(fp, syntax_tree);
    fclose(fp);
@@ -44,9 +50,9 @@ int main(int argc, char* argv[]) {
    else 
       printf("ERROR.\n");
 
-   fp=fopen("saida2.pico", "w+");
+   /*fp=fopen("saida2.pico", "w+");
    uncompile(fp, syntax_tree);
-   fclose(fp);
+   fclose(fp);*/
 
 
    return(0);

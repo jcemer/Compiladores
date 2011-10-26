@@ -8,8 +8,12 @@
   #include <stdio.h>
   #include <stdlib.h>
   #include "node.h"
+  #include "symbol_table.h"
+  #include "lista.h"
 
- Node* syntax_tree = NULL;
+  #define UNDEFINED_SYMBOL_ERROR -21
+  Node* syntax_tree = NULL;
+
 %}
 
 %union {
@@ -115,19 +119,20 @@ tipo: tipounico{
 	}
     ;
 
-tipounico: INT{
+tipounico: 
+    INT{
 		$$ = create_node(@1.first_line, nodo_tipounico, "int", NULL, NULL);	
-	}
-         | DOUBLE{
+	} 
+  | DOUBLE{
 		$$ = create_node(@1.first_line, nodo_tipounico, "double", NULL, NULL);	
-	}
-         | REAL{
+	} 
+  | REAL{
 		$$ = create_node(@1.first_line, nodo_tipounico, "real", NULL, NULL);	
-	}
-         | CHAR{
+	} 
+  | CHAR{
 		$$ = create_node(@1.first_line, nodo_tipounico, "char", NULL, NULL);	
 	}
-         ;
+;
 
 tipolista: INT '(' listadupla ')'{
 		$$ = create_node(@1.first_line, nodo_tipolista, "int", coringa("("), $3, coringa(")"), NULL, NULL);	
@@ -184,27 +189,35 @@ listaexpr: expr{
 	   ;
 
 expr: expr '+' expr {
+	    // IMPLEMENTAR
 		$$ = create_node(@1.first_line, nodo_mais, "+", $1, coringa("+"), $3, NULL, NULL);
 	}
     | expr '-' expr{
+    	// IMPLEMENTAR
 		$$ = create_node(@1.first_line, nodo_menos, "-", $1, coringa("-"), $3, NULL, NULL);
 	}
     | expr '*' expr{
+    	// IMPLEMENTAR
 		$$ = create_node(@1.first_line, nodo_multiplicacao, "*", $1, coringa("*"), $3, NULL, NULL);
 	}
     | expr '/' expr{
+    	// IMPLEMENTAR
 		$$ = create_node(@1.first_line, nodo_divisao, "/", $1, coringa("/"), $3, NULL, NULL);
 	}
     | '(' expr ')' {
+    	// IMPLEMENTAR
 		$$ = create_node(@1.first_line, nodo_expressao, "()", coringa("("), $2, coringa(")"), NULL, NULL);
 	}
     | INT_LIT  {
+    	// IMPLEMENTAR
 		$$ = create_node(@1.first_line, nodo_int, $1, NULL, NULL);
 	} 
     | F_LIT {
+    	// IMPLEMENTAR
 		$$ = create_node(@1.first_line, nodo_float, $1, NULL, NULL);
 	}    
     | lvalue {
+    	// IMPLEMENTAR
 		$$ = create_node(@1.first_line, nodo_expr, "expr", $1, NULL, NULL);
 	}
     | chamaproc {
@@ -280,3 +293,4 @@ enunciado: PRINTF '(' expr ')' {
 %%
  /* A partir daqui, insere-se qlqer codigo C necessario.
   */
+

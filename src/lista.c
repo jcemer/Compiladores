@@ -2,10 +2,6 @@
 #include <stdlib.h>
 #include "lista.h"
 
-int main(int argc, char* argv[]) {
-   printf("oi");
-}
-
 struct tac* create_inst_tac(const char* res, const char* arg1, const char* op, const char* arg2) {
    struct tac* i = (struct tac*) malloc(sizeof(struct tac));
    i->res = res;
