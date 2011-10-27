@@ -223,6 +223,7 @@ expr:
     }
   | '(' expr ')' {
         $$ = create_node(@1.first_line, nodo_expressao, "()", coringa("("), $2, coringa(")"), NULL, NULL);
+        $$->attribute = $2->attribute;
     }
   | INT_LIT  {
         $$ = create_node(@1.first_line, nodo_int, $1, NULL, NULL);
@@ -243,6 +244,7 @@ expr:
   | lvalue {
         // IMPLEMENTAR
         $$ = create_node(@1.first_line, nodo_expr, "expr", $1, NULL, NULL);
+        $$->attribute = $1->attribute;
     }
   | chamaproc {
         $$ = create_node(@1.first_line, nodo_expr, "expr", $1, NULL, NULL);
