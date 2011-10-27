@@ -215,8 +215,8 @@ expr:
         if((left->type == INT_TYPE) && (right->type == INT_TYPE)) {
             at->type = INT_TYPE;
             address(&(at->value), rx_temp(INT_TYPE), RX);
-            //append_inst_tac(&(at->code), create_inst_tac(3, at->var, l->var, o->oper_int, r->var));
-            printf("%s", at->value);
+            append_inst_tac(&(at->code), create_inst_tac(at->value, left->value, "ADD", right->value));
+            //printf("%s", at->value);
         }
         // IMPLEMENTA
         
