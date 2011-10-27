@@ -23,7 +23,47 @@ struct tac* create_inst_tac(const char* res, const char* arg1, const char* op, c
  * @param out um ponteiro sobre um arquivo (aberto) aonde ira ser escrita a instrucao.
  * @param i a instrucao a ser impressa.
  */
-void print_inst_tac(FILE* out, struct tac i);
+void print_inst_tac(FILE* out, struct tac i) {
+    if (!strcmp(i.op, ":="))
+        fprintf(out, "%s := %s\n", i.res, i.arg1);
+    else
+        fprintf(out, "%s := %s %s %s\n", i.res, i.arg1, i.op, i.arg2);
+
+/*
+
+   char *rotulo = malloc(sizeof(char)*4);
+  if(i.type == TACTYPE_LABEL) {
+    fprintf(out, "%s:\n", i.arg1);
+  }
+  else {
+    if(ordem < 10)
+        sprintf(rotulo, "00%d", ordem);
+    else if(ordem < 100)
+        sprintf(rotulo, "0%d", ordem);
+    else 
+        sprintf(rotulo, "%d", ordem);
+    fprintf(out, "%s:   ", rotulo);
+    if(i.type == TACTYPE_FPRINT) {
+        fprintf(out, "FPRINT %s\n", i.res);
+    }
+    if(i.type == TACTYPE_PRINT) {
+        fprintf(out, "PRINT %s\n", i.res);
+    }
+    if(i.type == TACTYPE_ATTRIB) {
+        if(strcmp(i.op, ":=") == 0)
+            fprintf(out, "%s := %s\n", i.res, i.arg1);
+        else
+            fprintf(out, "%s := %s %s %s\n", i.res, i.arg1, i.op, i.arg2);
+    }
+
+    if(i.type == TACTYPE_GOTO) {
+      fprintf(out, "GOTO %s\n", i.arg1);
+    }
+    if(i.type == TACTYPE_RELOP) {
+      fprintf(out, "IF %s %s %s GOTO %s\n", i.arg1, i.op, i.arg2, i.res);
+    }
+  }*/
+}
 
 /** \brief Imprime no arquivo apontado por 'out' o conteudo da lista apontada
  * por 'code'.
@@ -40,11 +80,17 @@ void print_inst_tac(FILE* out, struct tac i);
  *   999:  ultima_instrucao
  *   000:  agora_tem_instrucao_demais
  */
-void print_tac(FILE* out, struct node_tac * code);
+void print_tac(FILE* out, struct node_tac * code) {
+    while (code) {
+        fprintf(out, "%03d:   ", code->number);
+        print_inst_tac(out, *code->inst);
+        code = code->next;
+    }
+}
 
 void append_inst_tac(struct node_tac ** code, struct tac * inst) {
     struct node_tac *new = (struct node_tac *) malloc(sizeof(struct node_tac));
-    new->number = 1;
+    new->number = 0;
     new->inst = inst;
     cat_tac(code, &new);
 }

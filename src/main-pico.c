@@ -30,14 +30,12 @@ int main(int argc, char* argv[]) {
    init_table(&s_table);
 
    if (!yyparse()) {
-      
-
-
       printf("OKAY.\n");
    } else { 
       printf("ERROR.\n");
    }
 
+/*
    fp=fopen("saida.pico", "w+");
    uncompile(fp, syntax_tree);
    fclose(fp);
@@ -48,7 +46,7 @@ int main(int argc, char* argv[]) {
    else 
       printf("ERROR.\n");
 
-   /*fp=fopen("saida2.pico", "w+");
+   fp=fopen("saida2.pico", "w+");
    uncompile(fp, syntax_tree);
    fclose(fp);*/
 

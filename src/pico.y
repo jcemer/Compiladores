@@ -203,7 +203,6 @@ expr:
         attr_expr * left = $1->attribute;
         attr_expr * right = $3->attribute;
 
-                 //opera_attr_t *o = ((opera_attr_t *)$2->attribute);
         attr_expr * at = (attr_expr *) malloc(sizeof(attr_expr));
         at->code = NULL;
         cat_tac(&(at->code), &(left->code));
@@ -212,14 +211,13 @@ expr:
         if(NaN(left->type) || NaN(right->type))
             return TYPE_MISMATCH_ERROR;
         
-        if((left->type == INT_TYPE) && (right->type == INT_TYPE)) {
+        if(left->type == INT_TYPE && right->type == INT_TYPE) {
             at->type = INT_TYPE;
             address(&(at->value), rx_temp(INT_TYPE), RX);
             append_inst_tac(&(at->code), create_inst_tac(at->value, left->value, "ADD", right->value));
-            //printf("%s", at->value);
         }
-        // IMPLEMENTA
-        
+        // TODO: FLOAT
+        print_tac(stdout, at->code);
     }
   | expr '-' expr{
         // IMPLEMENTAR
