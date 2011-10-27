@@ -15,7 +15,12 @@
   #include "attr.h"
 
   #define UNDEFINED_SYMBOL_ERROR -21
+  #define TYPE_MISMATCH_ERROR -20
+  #define SP "SP"
+  #define RX "Rx"
   Node* syntax_tree = NULL;
+
+  void address(char **out, int num, char *ap);
 
 %}
 
@@ -195,14 +200,24 @@ expr:
     expr '+' expr {
         $$ = create_node(@1.first_line, nodo_mais, "+", $1, coringa("+"), $3, NULL, NULL);
 
-        attr_expr * at = (attr_expr *) malloc(sizeof(attr_expr));
         attr_expr * left = $1->attribute;
         attr_expr * right = $3->attribute;
 
                  //opera_attr_t *o = ((opera_attr_t *)$2->attribute);
+        attr_expr * at = (attr_expr *) malloc(sizeof(attr_expr));
         at->code = NULL;
-        //cat_tac(&(at->code), &(left->code));
-        //cat_tac(&(at->code), &(right->code));
+        cat_tac(&(at->code), &(left->code));
+        cat_tac(&(at->code), &(right->code));
+
+        if(NaN(left->type) || NaN(right->type))
+            return TYPE_MISMATCH_ERROR;
+        
+        if((left->type == INT_TYPE) && (right->type == INT_TYPE)) {
+            at->type = INT_TYPE;
+            address(&(at->value), rx_temp(INT_TYPE), RX);
+            //append_inst_tac(&(at->code), create_inst_tac(3, at->var, l->var, o->oper_int, r->var));
+            printf("%s", at->value);
+        }
         // IMPLEMENTA
         
     }
@@ -223,7 +238,7 @@ expr:
     }
   | INT_LIT  {
         $$ = create_node(@1.first_line, nodo_int, $1, NULL, NULL);
-        attr_expr * at = (attr_expr *) malloc(sizeof(attr_expr));
+        attr_expr * at = malloc(sizeof(attr_expr));
         at->value = $1;
         at->type = INT_TYPE;
         at->code = NULL;
@@ -231,7 +246,7 @@ expr:
     } 
   | F_LIT {
         $$ = create_node(@1.first_line, nodo_float, $1, NULL, NULL);
-        attr_expr * at = (attr_expr *) malloc(sizeof(attr_expr));
+        attr_expr * at = malloc(sizeof(attr_expr));
         at->value = $1;
         at->type = FLOAT_TYPE;
         at->code = NULL;
@@ -315,3 +330,23 @@ enunciado: PRINTF '(' expr ')' {
  /* A partir daqui, insere-se qlqer codigo C necessario.
   */
 
+int NaN(int type) {
+    return type == CHAR_TYPE; // not a number
+}
+void address(char ** out, int num, char *ap) {
+    * out = malloc(sizeof(char) * 8);
+    sprintf(* out, "%03d(%s)", num, ap);
+}
+
+int rx_tempCount = 0;
+int rx_temp(int type) {
+    int ret = rx_tempCount;
+    switch(type) {
+        case CHAR_TYPE:     rx_tempCount += CHAR_SIZE; break;
+        case INT_TYPE:      rx_tempCount += INT_SIZE; break;
+        case FLOAT_TYPE:    rx_tempCount += FLOAT_SIZE; break;
+        case DOUBLE_TYPE:   rx_tempCount += DOUBLE_SIZE; break;
+    }
+    //printf("%i", type);
+    return ret;
+}
