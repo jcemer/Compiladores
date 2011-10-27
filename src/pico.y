@@ -1,27 +1,31 @@
 %error-verbose
 %{
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <string.h>
+    #include <stdarg.h>
 
-  /* Aqui, pode-se inserir qualquer codigo C necessario ah compilacao
-   * final do parser. Sera copiado tal como esta no inicio do y.tab.c
-   * gerado por Yacc.
-   */
-  #include <stdio.h>
-  #include <stdlib.h>
-  #include <string.h>
+    #include "node.h"
+    #include "symbol_table.h"
+    #include "lista.c"
+    #include "attr.h"
 
-  #include "node.h"
-  #include "symbol_table.h"
-  #include "lista.c"
-  #include "attr.h"
+    Node* syntax_tree = NULL;
 
-  #define UNDEFINED_SYMBOL_ERROR -21
-  #define TYPE_MISMATCH_ERROR -20
-  #define SP "SP"
-  #define RX "Rx"
-  Node* syntax_tree = NULL;
+    #define UNDEFINED_SYMBOL_ERROR -21
+    #define TYPE_MISMATCH_ERROR -20
+    #define GET_ERROR 1
+    int errorValue;
+    int error(int type);
 
-  void address(char **out, int num, char *ap);
+    #define SP "SP"
+    #define RX "Rx"
 
+    void address(char ** out, int num, char *ap);
+    int operation(attr_expr ** at, char * type, attr_expr * left, attr_expr * right);
+
+    int rx_tempCount = 0;
+    int rx_temp(int type);
 %}
 
 %union {
@@ -199,37 +203,23 @@ listaexpr: expr{
 expr: 
     expr '+' expr {
         $$ = create_node(@1.first_line, nodo_mais, "+", $1, coringa("+"), $3, NULL, NULL);
-
-        attr_expr * left = $1->attribute;
-        attr_expr * right = $3->attribute;
-
-        attr_expr * at = (attr_expr *) malloc(sizeof(attr_expr));
-        at->code = NULL;
-        cat_tac(&(at->code), &(left->code));
-        cat_tac(&(at->code), &(right->code));
-
-        if(NaN(left->type) || NaN(right->type))
-            return TYPE_MISMATCH_ERROR;
-        
-        if(left->type == INT_TYPE && right->type == INT_TYPE) {
-            at->type = INT_TYPE;
-            address(&(at->value), rx_temp(INT_TYPE), RX);
-            append_inst_tac(&(at->code), create_inst_tac(at->value, left->value, "ADD", right->value));
-        }
-        // TODO: FLOAT
-        print_tac(stdout, at->code);
+        if (!operation((attr_expr **) &($$->attribute), "ADD", $1->attribute, $3->attribute))
+            return error(GET_ERROR);
     }
   | expr '-' expr{
-        // IMPLEMENTAR
         $$ = create_node(@1.first_line, nodo_menos, "-", $1, coringa("-"), $3, NULL, NULL);
+        if (!operation((attr_expr **) &($$->attribute), "SUB", $1->attribute, $3->attribute))
+            return error(GET_ERROR);
     }
   | expr '*' expr{
-        // IMPLEMENTAR
         $$ = create_node(@1.first_line, nodo_multiplicacao, "*", $1, coringa("*"), $3, NULL, NULL);
+        if (!operation((attr_expr **) &($$->attribute), "MUL", $1->attribute, $3->attribute))
+            return error(GET_ERROR);
     }
   | expr '/' expr{
-        // IMPLEMENTAR
         $$ = create_node(@1.first_line, nodo_divisao, "/", $1, coringa("/"), $3, NULL, NULL);
+        if (!operation((attr_expr **) &($$->attribute), "DIV", $1->attribute, $3->attribute))
+            return error(GET_ERROR);
     }
   | '(' expr ')' {
         $$ = create_node(@1.first_line, nodo_expressao, "()", coringa("("), $2, coringa(")"), NULL, NULL);
@@ -336,10 +326,33 @@ void address(char ** out, int num, char *ap) {
     sprintf(* out, "%03d(%s)", num, ap);
 }
 
-int rx_tempCount = 0;
+int operation(attr_expr ** ret, char * type, attr_expr * left, attr_expr * right) {
+    attr_expr * at = (attr_expr *) malloc(sizeof(attr_expr));
+    * ret = at;
+    at->code = NULL;
+    cat_tac(&(at->code), &(left->code));
+    cat_tac(&(at->code), &(right->code));
+
+    if(NaN(left->type) || NaN(right->type))
+        return error(TYPE_MISMATCH_ERROR);
+    
+    if(left->type == INT_TYPE && right->type == INT_TYPE) {
+        at->type = INT_TYPE;
+        address(&(at->value), rx_temp(INT_TYPE), RX);
+        append_inst_tac(&(at->code), create_inst_tac(at->value, left->value, type, right->value));
+    }
+    // TODO: FLOAT
+    return 0;
+}
+int error(int value) {
+    if (value == GET_ERROR)
+        return errorValue;
+    return errorValue = value;
+}
+
 int rx_temp(int type) {
     int ret = rx_tempCount;
-    switch(type) {
+    switch (type) {
         case CHAR_TYPE:     rx_tempCount += CHAR_SIZE; break;
         case INT_TYPE:      rx_tempCount += INT_SIZE; break;
         case FLOAT_TYPE:    rx_tempCount += FLOAT_SIZE; break;

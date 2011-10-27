@@ -100,7 +100,7 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 27 "pico.y"
+#line 31 "pico.y"
 {
   struct _node * no;
   char* string;
