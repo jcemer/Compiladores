@@ -1,13 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "lista.h"
 
 struct tac* create_inst_tac(const char* res, const char* arg1, const char* op, const char* arg2) {
    struct tac* i = (struct tac*) malloc(sizeof(struct tac));
-   i->res = res;
-   i->arg1 = arg1;
-   i->op = op;
-   i->arg2 = arg2;
+
+   i->res = (char*) malloc(sizeof(char) * (1+strlen(res)));
+   i->arg1 = (char*) malloc(sizeof(char) * (1+strlen(arg1)));
+   i->op = (char*) malloc(sizeof(char)*(1+strlen(op)));
+   i->arg2 = (char*) malloc(sizeof(char)*(1+strlen(arg2)));
+
+   strcpy(i->res, res);
+   strcpy(i->arg1, arg1);
+   strcpy(i->op, op);
+   strcpy(i->arg2, arg2);
    return i;
 }
 

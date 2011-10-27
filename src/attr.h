@@ -31,7 +31,7 @@ typedef struct attr_tipolista {
 typedef struct attr_expr {
     int type;
     char *value; /*temporário a armazenar o cálculo*/
-    node_tac *code; /*código para calcular*/
+    struct node_tac *code; /*código para calcular*/
 } attr_expr;
 
 typedef struct attr_listaexpr {
@@ -55,7 +55,7 @@ typedef struct attr_opera {
 } attr_opera;
 
 typedef struct attr_expbool {
-    node_tac *code; /*código para calcular*/
+    struct node_tac *code; /*código para calcular*/
     //char* t; char* f;
 } attr_expbool;
 
