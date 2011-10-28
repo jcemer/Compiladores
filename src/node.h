@@ -55,14 +55,6 @@ typedef int Node_type;
 
 #define nodo_coringa          500
 
-
-/* A completar */
-
-/** Estrutura de dados parcial para o no da arvore.
- *
- */
-
-
 #ifdef __GNUC__
     /* If using gcc, warn about missing NULLs */
     #define NULL_TERMINATED __attribute__((sentinel))
@@ -80,7 +72,6 @@ typedef struct _node {
 } Node;
 
 extern Node * syntax_tree;
-
 
 
 /**

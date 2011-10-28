@@ -1,11 +1,11 @@
 #define INT_TYPE 1
 #define CHAR_TYPE 2
-#define FLOAT_TYPE 3
+#define REAL_TYPE 3
 #define DOUBLE_TYPE 4
 
 #define INT_SIZE 4
 #define CHAR_SIZE 1
-#define FLOAT_SIZE 4
+#define REAL_SIZE 4
 #define DOUBLE_SIZE 8
 
 typedef struct attr {

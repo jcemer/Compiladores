@@ -145,20 +145,32 @@ tipo:
 
 tipounico: 
     INT{
-        // IMPLEMENTAR
-        $$ = create_node(@1.first_line, nodo_tipounico, "int", NULL, NULL); 
+        attr_tipounico *at = malloc(sizeof(attr_tipounico));
+        at->type = INT_TYPE;
+        at->size = INT_SIZE;
+        $$ = create_node(@1.first_line, nodo_tipounico, "int", NULL, NULL);
+        $$->attribute = at;
     } 
   | DOUBLE{
-        // IMPLEMENTAR
-        $$ = create_node(@1.first_line, nodo_tipounico, "double", NULL, NULL);  
+        attr_tipounico *at = malloc(sizeof(attr_tipounico));
+        at->type = DOUBLE_TYPE;
+        at->size = DOUBLE_SIZE;
+        $$ = create_node(@1.first_line, nodo_tipounico, "double", NULL, NULL);
+        $$->attribute = at;
     } 
   | REAL{
-        // IMPLEMENTAR
-        $$ = create_node(@1.first_line, nodo_tipounico, "real", NULL, NULL);    
+        attr_tipounico *at = malloc(sizeof(attr_tipounico));
+        at->type = REAL_TYPE;
+        at->size = REAL_SIZE;
+        $$ = create_node(@1.first_line, nodo_tipounico, "real", NULL, NULL);
+        $$->attribute = at;
     } 
   | CHAR{
-        // IMPLEMENTAR
-        $$ = create_node(@1.first_line, nodo_tipounico, "char", NULL, NULL);    
+        attr_tipounico *at = malloc(sizeof(attr_tipounico));
+        at->type = CHAR_TYPE;
+        at->size = CHAR_SIZE;
+        $$ = create_node(@1.first_line, nodo_tipounico, "char", NULL, NULL);
+        $$->attribute = at;
     }
 ;
 
@@ -278,7 +290,7 @@ expr:
         $$ = create_node(@1.first_line, nodo_float, $1, NULL, NULL);
         attr_expr * at = malloc(sizeof(attr_expr));
         at->value = $1;
-        at->type = FLOAT_TYPE;
+        at->type = REAL_TYPE;
         at->code = NULL;
         $$->attribute = at;
     }    
@@ -407,7 +419,7 @@ int rx_temp(int type) {
     switch (type) {
         case CHAR_TYPE:     rx_tempCount += CHAR_SIZE; break;
         case INT_TYPE:      rx_tempCount += INT_SIZE; break;
-        case FLOAT_TYPE:    rx_tempCount += FLOAT_SIZE; break;
+        case REAL_TYPE:     rx_tempCount += REAL_SIZE; break;
         case DOUBLE_TYPE:   rx_tempCount += DOUBLE_SIZE; break;
     }
     //printf("%i", type);
