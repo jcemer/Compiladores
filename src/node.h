@@ -14,22 +14,22 @@ typedef int Node_type;
 /* Serie de constantes que servirao para definir tipos de nos (na arvore). 
  * Essa serie pode ser completada ou alterada a vontade.
  */
-#define nodo_programa	      302
+#define nodo_programa         302
 #define nodo_declaracoes      303
-#define nodo_declaracao	      304
-#define nodo_idf	      305
+#define nodo_declaracao       304
+#define nodo_idf              305
 #define nodo_listadeclaracao  306
-#define nodo_tipo	      307
+#define nodo_tipo             307
 #define nodo_tipounico	      308
 #define nodo_tipolista	      309
 #define nodo_listadupla	      310
-#define nodo_int	      311
-#define nodo_acoes	      312
+#define nodo_int              311
+#define nodo_acoes            312
 #define nodo_comando	      313
-#define nodo_lvalue	      314
+#define nodo_lvalue           314
 #define nodo_parametro	      315
-#define nodo_mais	      316
-#define nodo_menos	      317
+#define nodo_mais             316
+#define nodo_menos            317
 #define nodo_divisao          318
 #define nodo_float            319
 #define nodo_expr             320
@@ -50,10 +50,10 @@ typedef int Node_type;
 #define nodo_eq               335
 #define nodo_ne               336
 #define nodo_multiplicacao    337
-#define nodo_expressao				338
-#define nodo_printf				339
+#define nodo_expressao        338
+#define nodo_printf           339
 
-#define nodo_coringa					500
+#define nodo_coringa          500
 
 
 /* A completar */
