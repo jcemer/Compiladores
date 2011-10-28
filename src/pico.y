@@ -123,7 +123,7 @@ declaracao:
 
 listadeclaracao: 
     IDF {
-        // IMPLEMENTAR
+        printf("oi");
         $$ = create_node(@1.first_line, nodo_idf, $1, NULL, NULL);
     }
   | IDF ',' listadeclaracao{
@@ -134,8 +134,8 @@ listadeclaracao:
 
 tipo: 
     tipounico{
-        // IMPLEMENTAR
-        $$ = create_node(@1.first_line, nodo_tipo, "tipo", $1, NULL, NULL); 
+        $$ = create_node(@1.first_line, nodo_tipo, "tipo", $1, NULL, NULL);
+        $$->attribute = $1->attribute;
     } 
   | tipolista{
         // IMPLEMENTAR

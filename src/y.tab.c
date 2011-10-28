@@ -1571,7 +1571,7 @@ yyreduce:
   case 7:
 #line 125 "pico.y"
     {
-        // IMPLEMENTAR
+        printf("oi");
         (yyval.no) = create_node((yylsp[(1) - (1)]).first_line, nodo_idf, (yyvsp[(1) - (1)].string), NULL, NULL);
     }
     break;
@@ -1587,8 +1587,8 @@ yyreduce:
   case 9:
 #line 136 "pico.y"
     {
-        // IMPLEMENTAR
-        (yyval.no) = create_node((yylsp[(1) - (1)]).first_line, nodo_tipo, "tipo", (yyvsp[(1) - (1)].no), NULL, NULL); 
+        (yyval.no) = create_node((yylsp[(1) - (1)]).first_line, nodo_tipo, "tipo", (yyvsp[(1) - (1)].no), NULL, NULL);
+        (yyval.no)->attribute = (yyvsp[(1) - (1)].no)->attribute;
     }
     break;
 
