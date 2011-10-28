@@ -8,6 +8,10 @@
 #define FLOAT_SIZE 4
 #define DOUBLE_SIZE 8
 
+typedef struct attr {
+    struct node_tac *code;
+} attr;
+
 typedef struct attr_tipounico {
     int type;
     int size;

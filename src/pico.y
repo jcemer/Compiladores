@@ -92,133 +92,174 @@
  /* A completar com seus tokens - compilar com 'yacc -d' */
 
 %%
-code: declaracoes acoes{
-        $$ = create_node(@1.first_line, nodo_programa, "code", $1, $2, NULL, NULL);
-        syntax_tree = $$;
+code: 
+    declaracoes acoes{
+        syntax_tree = $$ = create_node(@1.first_line, nodo_programa, "code", $1, $2, NULL, NULL);
+        $$->attribute = $2->attribute;
+        print_tac(stdout, ((attr *) $$->attribute)->code);
     }
-    | acoes{ 
-        $$ = $1; 
-        syntax_tree = $$;
+  | acoes{ 
+        syntax_tree = $$ = $1;
     }
-    ;
+;
 
-declaracoes: declaracao ';'{
+declaracoes: 
+    declaracao ';' {
+        // IMPLEMENTAR
         $$ = create_node(@1.first_line, nodo_declaracoes, "declaracoes", $1, coringa(";"), NULL, NULL); 
     }
-           | declaracoes declaracao ';'{
+  | declaracoes declaracao ';' {
+        // IMPLEMENTAR
         $$ = create_node(@1.first_line, nodo_declaracoes, "declaracoes", $1, $2, coringa(";"), NULL, NULL);
     }
-           ;
+;
 
-declaracao: tipo ':' listadeclaracao{
+declaracao: 
+    tipo ':' listadeclaracao{
+        // IMPLEMENTAR
         $$ = create_node(@1.first_line, nodo_declaracao, "declaracao", $1, coringa(":"), $3, NULL, NULL);
     }
-       ; 
+; 
 
-listadeclaracao: IDF {
+listadeclaracao: 
+    IDF {
+        // IMPLEMENTAR
         $$ = create_node(@1.first_line, nodo_idf, $1, NULL, NULL);
     }
-               | IDF ',' listadeclaracao{
+  | IDF ',' listadeclaracao{
+        // IMPLEMENTAR
         $$ = create_node(@1.first_line, nodo_listadeclaracao, "listadeclaracao", create_node(@1.first_line, nodo_idf, $1, NULL, NULL), coringa(","), $3, NULL, NULL);
     }
-               ;
+;
 
-tipo: tipounico{
+tipo: 
+    tipounico{
+        // IMPLEMENTAR
         $$ = create_node(@1.first_line, nodo_tipo, "tipo", $1, NULL, NULL); 
     } 
-    | tipolista{
+  | tipolista{
+        // IMPLEMENTAR
         $$ = create_node(@1.first_line, nodo_tipo, "tipo", $1, NULL, NULL); 
     }
-    ;
+;
 
 tipounico: 
     INT{
+        // IMPLEMENTAR
         $$ = create_node(@1.first_line, nodo_tipounico, "int", NULL, NULL); 
     } 
   | DOUBLE{
+        // IMPLEMENTAR
         $$ = create_node(@1.first_line, nodo_tipounico, "double", NULL, NULL);  
     } 
   | REAL{
+        // IMPLEMENTAR
         $$ = create_node(@1.first_line, nodo_tipounico, "real", NULL, NULL);    
     } 
   | CHAR{
+        // IMPLEMENTAR
         $$ = create_node(@1.first_line, nodo_tipounico, "char", NULL, NULL);    
     }
 ;
 
-tipolista: INT '(' listadupla ')'{
+tipolista: 
+    INT '(' listadupla ')'{
+        // IMPLEMENTAR
         $$ = create_node(@1.first_line, nodo_tipolista, "int", coringa("("), $3, coringa(")"), NULL, NULL); 
     }
-         | DOUBLE '(' listadupla ')'{
+  | DOUBLE '(' listadupla ')'{
+        // IMPLEMENTAR
         $$ = create_node(@1.first_line, nodo_tipolista, "double", coringa("("), $3, coringa(")"), NULL, NULL);  
     }
-         | REAL '(' listadupla ')'{
+  | REAL '(' listadupla ')'{
+        // IMPLEMENTAR
         $$ = create_node(@1.first_line, nodo_tipolista, "real", coringa("("), $3, coringa(")"), NULL, NULL);    
     }
-         | CHAR '(' listadupla ')'{
+  | CHAR '(' listadupla ')'{
+        // IMPLEMENTAR
         $$ = create_node(@1.first_line, nodo_tipolista, "char", coringa("("), $3, coringa(")"), NULL, NULL);    
     }
-         ;
+;
 
-listadupla: INT_LIT ':' INT_LIT{
+listadupla: 
+    INT_LIT ':' INT_LIT{
+        // IMPLEMENTAR
         $$ = create_node(@1.first_line, nodo_listadupla, "listadupla", create_node(@1.first_line, nodo_int, $1, NULL, NULL), coringa(":"), create_node(@1.first_line, nodo_int, $3, NULL, NULL), NULL, NULL);
     }
-          | INT_LIT ':' INT_LIT ',' listadupla{
+  | INT_LIT ':' INT_LIT ',' listadupla{
+        // IMPLEMENTAR
         $$ = create_node(@1.first_line, nodo_listadupla, "listadupla", create_node(@1.first_line, nodo_int, $1, NULL, NULL), coringa(":"), create_node(@1.first_line, nodo_int, $3, NULL, NULL), coringa(","), $5, NULL, NULL);
     }
-          ;
+;
 
-acoes: comando ';'  { 
+acoes: 
+    comando ';' {
         $$ = create_node(@1.first_line, nodo_acoes, "acoes", $1, coringa(";"), NULL, NULL);
+        $$->attribute = $1->attribute;
     }
-    | comando ';' acoes {
-        $$ = create_node(@1.first_line, nodo_acoes, "acoes", $1, coringa(";"), $3, NULL, NULL);
-    }
-    ;
+  | comando ';' acoes {
+        attr * at = (attr *) malloc(sizeof(attr));
+        at->code = NULL;
+        cat_tac(&(at->code), &((attr *) $1->attribute)->code);
+        cat_tac(&(at->code), &((attr *) $3->attribute)->code);
 
-comando: lvalue '=' expr {
+        $$ = create_node(@1.first_line, nodo_acoes, "acoes", $1, coringa(";"), $3, NULL, NULL);
+        $$->attribute = at;
+    }
+;
+
+comando: 
+    lvalue '=' expr {
+        // IMPLEMENTAR
         $$ = create_node(@1.first_line, nodo_comando, "comando", $1, coringa("="), $3, NULL, NULL);
     }
-       | enunciado { 
+  | enunciado { 
         $$ = create_node(@1.first_line, nodo_comando, "comando", $1, NULL, NULL);
+        $$->attribute = $1->attribute;
     }
-       ;
+;
 
-lvalue: IDF {
+lvalue: 
+    IDF {
+        // IMPLEMENTAR
         $$ = create_node(@1.first_line, nodo_idf, $1, NULL, NULL);
     }
-      | IDF '[' listaexpr ']' {
+  | IDF '[' listaexpr ']' {
+        // IMPLEMENTAR
         $$ = create_node(@1.first_line, nodo_lvalue, "lvalue", create_node(@1.first_line, nodo_idf, $1, NULL, NULL), coringa("["), $3, coringa("]"), NULL, NULL);
     }
-      ;
+;
 
-listaexpr: expr{
+listaexpr: 
+    expr {
+        // IMPLEMENTAR
         $$ = create_node(@1.first_line, nodo_parametro, "listaexpr", $1, NULL, NULL);
     }
-       | expr ',' listaexpr {
+  | expr ',' listaexpr {
+        // IMPLEMENTAR
         $$ = create_node(@1.first_line, nodo_parametro, "listaexpr", $1, coringa(","), $3, NULL, NULL);
     }
-       ;
+;
 
 expr: 
     expr '+' expr {
         $$ = create_node(@1.first_line, nodo_mais, "+", $1, coringa("+"), $3, NULL, NULL);
-        if (!operation((attr_expr **) &($$->attribute), "ADD", $1->attribute, $3->attribute))
+        if (operation((attr_expr **) &($$->attribute), "ADD", $1->attribute, $3->attribute))
             return error(GET_ERROR);
     }
   | expr '-' expr{
         $$ = create_node(@1.first_line, nodo_menos, "-", $1, coringa("-"), $3, NULL, NULL);
-        if (!operation((attr_expr **) &($$->attribute), "SUB", $1->attribute, $3->attribute))
+        if (operation((attr_expr **) &($$->attribute), "SUB", $1->attribute, $3->attribute))
             return error(GET_ERROR);
     }
   | expr '*' expr{
         $$ = create_node(@1.first_line, nodo_multiplicacao, "*", $1, coringa("*"), $3, NULL, NULL);
-        if (!operation((attr_expr **) &($$->attribute), "MUL", $1->attribute, $3->attribute))
+        if (operation((attr_expr **) &($$->attribute), "MUL", $1->attribute, $3->attribute))
             return error(GET_ERROR);
     }
   | expr '/' expr{
         $$ = create_node(@1.first_line, nodo_divisao, "/", $1, coringa("/"), $3, NULL, NULL);
-        if (!operation((attr_expr **) &($$->attribute), "DIV", $1->attribute, $3->attribute))
+        if (operation((attr_expr **) &($$->attribute), "DIV", $1->attribute, $3->attribute))
             return error(GET_ERROR);
     }
   | '(' expr ')' {
@@ -242,7 +283,6 @@ expr:
         $$->attribute = at;
     }    
   | lvalue {
-        // IMPLEMENTAR
         $$ = create_node(@1.first_line, nodo_expr, "expr", $1, NULL, NULL);
         $$->attribute = $1->attribute;
     }
@@ -251,70 +291,80 @@ expr:
     }
 ;
 
-chamaproc: IDF '(' listaexpr ')' {
+chamaproc: 
+    IDF '(' listaexpr ')' {
         $$ = create_node(@1.first_line, nodo_proc, "chamaproc", create_node(@1.first_line, nodo_idf, $1, NULL, NULL), coringa("("), $3, coringa(")"), NULL, NULL);
     }
-         ;
+;
 
-enunciado: expr { $$ = $1 ;}
-         | IF '(' expbool ')' THEN acoes fiminstcontrole {
-        $$ = create_node(@1.first_line, nodo_if, "if", coringa("("), $3, coringa(")"), coringa("then"), $6, $7, NULL, NULL);
-    }
-         | WHILE '(' expbool ')' '{' acoes '}' {
-        $$ = create_node(@1.first_line, nodo_while, "while", coringa("("), $3, coringa(")"), coringa("{"), $6, coringa("}"), NULL, NULL);
-    }
-         ;
+enunciado: 
+    expr {
+        attr * at = (attr *) malloc(sizeof(attr));
+        at->code = ((attr_expr *) $1->attribute)->code;
 
-fiminstcontrole: END {
-        $$ = create_node(@1.first_line, nodo_end, "end", NULL, NULL);
+        $$ = create_node(@1.first_line, nodo_expr, "expr", $1, NULL, NULL);
+        $$->attribute = at;
     }
-               | ELSE acoes END {
-        $$ = create_node(@1.first_line, nodo_else, "else", $2, create_node(@1.first_line, nodo_end, "end", NULL, NULL), NULL, NULL);
-    }
-               ;
-
-expbool: TRUE {
-        $$ = create_node(@1.first_line, nodo_true, "true", NULL, NULL);
-    }
-       | FALSE {
-        $$ = create_node(@1.first_line, nodo_false, "false", NULL, NULL);
-    }
-       | '(' expbool ')' {
-        $$ = create_node(@1.first_line, nodo_expressao, "()", coringa("("), $2, coringa(")"), NULL, NULL);
-    }
-       | expbool AND expbool {
-        $$ = create_node(@1.first_line, nodo_and, "and", $1, coringa("&"), $3, NULL, NULL);
-    }
-       | expbool OR expbool {
-        $$ = create_node(@1.first_line, nodo_or, "or", $1, coringa("|"), $3, NULL, NULL);
-    }
-       | NOT expbool {
-        $$ = create_node(@1.first_line, nodo_not, "not", coringa("!"), $2, NULL, NULL);
-    }
-       | expr '>' expr {
-        $$ = create_node(@1.first_line, nodo_sup, "sup", $1, coringa(">"), $3, NULL, NULL);
-    }
-       | expr '<' expr {
-        $$ = create_node(@1.first_line, nodo_inf, "inf", $1, coringa("<"),$3, NULL, NULL);
-    }
-       | expr LE expr {
-        $$ = create_node(@1.first_line, nodo_le, "le", $1, coringa("<="), $3, NULL, NULL);
-    }
-       | expr GE expr {
-        $$ = create_node(@1.first_line, nodo_ge, "ge", $1, coringa(">="), $3, NULL, NULL);
-    }
-       | expr EQ expr {
-        $$ = create_node(@1.first_line, nodo_eq, "eq", $1, coringa("=="), $3, NULL, NULL);
-    }
-       | expr NE expr {
-        $$ = create_node(@1.first_line, nodo_ne, "ne", $1, coringa("<>"), $3, NULL, NULL);
-    }
-       ;
-
-enunciado: PRINTF '(' expr ')' {
+  | PRINTF '(' expr ')' {
+        // IMPLEMENTAR
         $$ = create_node(@1.first_line, nodo_printf, "print", $3, NULL, NULL);
     }
-        ;
+  | IF '(' expbool ')' THEN acoes fiminstcontrole {
+        $$ = create_node(@1.first_line, nodo_if, "if", coringa("("), $3, coringa(")"), coringa("then"), $6, $7, NULL, NULL);
+    }
+  | WHILE '(' expbool ')' '{' acoes '}' {
+        $$ = create_node(@1.first_line, nodo_while, "while", coringa("("), $3, coringa(")"), coringa("{"), $6, coringa("}"), NULL, NULL);
+    }
+;
+
+fiminstcontrole: 
+    END {
+        $$ = create_node(@1.first_line, nodo_end, "end", NULL, NULL);
+    }
+  | ELSE acoes END {
+        $$ = create_node(@1.first_line, nodo_else, "else", $2, create_node(@1.first_line, nodo_end, "end", NULL, NULL), NULL, NULL);
+    }
+;
+
+expbool: 
+    TRUE {
+        $$ = create_node(@1.first_line, nodo_true, "true", NULL, NULL);
+    }
+  | FALSE {
+        $$ = create_node(@1.first_line, nodo_false, "false", NULL, NULL);
+    }
+  | '(' expbool ')' {
+        $$ = create_node(@1.first_line, nodo_expressao, "()", coringa("("), $2, coringa(")"), NULL, NULL);
+    }
+  | expbool AND expbool {
+        $$ = create_node(@1.first_line, nodo_and, "and", $1, coringa("&"), $3, NULL, NULL);
+    }
+  | expbool OR expbool {
+        $$ = create_node(@1.first_line, nodo_or, "or", $1, coringa("|"), $3, NULL, NULL);
+    }
+  | NOT expbool {
+        $$ = create_node(@1.first_line, nodo_not, "not", coringa("!"), $2, NULL, NULL);
+    }
+  | expr '>' expr {
+        $$ = create_node(@1.first_line, nodo_sup, "sup", $1, coringa(">"), $3, NULL, NULL);
+    }
+  | expr '<' expr {
+        $$ = create_node(@1.first_line, nodo_inf, "inf", $1, coringa("<"),$3, NULL, NULL);
+    }
+  | expr LE expr {
+        $$ = create_node(@1.first_line, nodo_le, "le", $1, coringa("<="), $3, NULL, NULL);
+    }
+  | expr GE expr {
+        $$ = create_node(@1.first_line, nodo_ge, "ge", $1, coringa(">="), $3, NULL, NULL);
+    }
+   | expr EQ expr {
+        $$ = create_node(@1.first_line, nodo_eq, "eq", $1, coringa("=="), $3, NULL, NULL);
+    }
+  | expr NE expr {
+        $$ = create_node(@1.first_line, nodo_ne, "ne", $1, coringa("<>"), $3, NULL, NULL);
+    }
+;
+
 
 %%
  /* A partir daqui, insere-se qlqer codigo C necessario.

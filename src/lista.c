@@ -8,8 +8,8 @@ struct tac* create_inst_tac(const char* res, const char* arg1, const char* op, c
 
    i->res = (char*) malloc(sizeof(char) * (1+strlen(res)));
    i->arg1 = (char*) malloc(sizeof(char) * (1+strlen(arg1)));
-   i->op = (char*) malloc(sizeof(char)*(1+strlen(op)));
-   i->arg2 = (char*) malloc(sizeof(char)*(1+strlen(arg2)));
+   i->op = (char*) malloc(sizeof(char) * (1+strlen(op)));
+   i->arg2 = (char*) malloc(sizeof(char) * (1+strlen(arg2)));
 
    strcpy(i->res, res);
    strcpy(i->arg1, arg1);
