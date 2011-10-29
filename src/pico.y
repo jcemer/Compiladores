@@ -6,11 +6,13 @@
     #include <stdarg.h>
 
     #include "node.h"
-    #include "symbol_table.h"
+    #include "symbol_table.c"
     #include "lista.c"
     #include "attr.h"
 
     Node* syntax_tree = NULL;
+    symbol_t s_table;
+    int desloc = 0;
 
     #define UNDEFINED_SYMBOL_ERROR -21
     #define TYPE_MISMATCH_ERROR -20
@@ -21,8 +23,9 @@
     #define SP "SP"
     #define RX "Rx"
 
-    void address(char ** out, int num, char *ap);
-    int operation(attr_expr ** at, char * type, attr_expr * left, attr_expr * right);
+    void InsereFilhosTabela(Node *, Node *);
+    void address(char **, int, char *);
+    int operation(attr_expr **, char *, attr_expr *, attr_expr *);
 
     int rx_tempCount = 0;
     int rx_temp(int type);
@@ -116,14 +119,13 @@ declaracoes:
 
 declaracao: 
     tipo ':' listadeclaracao{
-        // IMPLEMENTAR
+        InsereFilhosTabela((Node *)$1, (Node *)$3);
         $$ = create_node(@1.first_line, nodo_declaracao, "declaracao", $1, coringa(":"), $3, NULL, NULL);
     }
 ; 
 
 listadeclaracao: 
     IDF {
-        printf("oi");
         $$ = create_node(@1.first_line, nodo_idf, $1, NULL, NULL);
     }
   | IDF ',' listadeclaracao{
@@ -145,28 +147,28 @@ tipo:
 
 tipounico: 
     INT{
-        attr_tipounico *at = malloc(sizeof(attr_tipounico));
+        attr_tipounico * at = malloc(sizeof(attr_tipounico));
         at->type = INT_TYPE;
         at->size = INT_SIZE;
         $$ = create_node(@1.first_line, nodo_tipounico, "int", NULL, NULL);
         $$->attribute = at;
     } 
   | DOUBLE{
-        attr_tipounico *at = malloc(sizeof(attr_tipounico));
+        attr_tipounico * at = malloc(sizeof(attr_tipounico));
         at->type = DOUBLE_TYPE;
         at->size = DOUBLE_SIZE;
         $$ = create_node(@1.first_line, nodo_tipounico, "double", NULL, NULL);
         $$->attribute = at;
     } 
   | REAL{
-        attr_tipounico *at = malloc(sizeof(attr_tipounico));
+        attr_tipounico * at = malloc(sizeof(attr_tipounico));
         at->type = REAL_TYPE;
         at->size = REAL_SIZE;
         $$ = create_node(@1.first_line, nodo_tipounico, "real", NULL, NULL);
         $$->attribute = at;
     } 
   | CHAR{
-        attr_tipounico *at = malloc(sizeof(attr_tipounico));
+        attr_tipounico * at = malloc(sizeof(attr_tipounico));
         at->type = CHAR_TYPE;
         at->size = CHAR_SIZE;
         $$ = create_node(@1.first_line, nodo_tipounico, "char", NULL, NULL);
@@ -194,13 +196,39 @@ tipolista:
 ;
 
 listadupla: 
-    INT_LIT ':' INT_LIT{
-        // IMPLEMENTAR
+    INT_LIT ':' INT_LIT {
+        attr_listadupla * at = malloc(sizeof(attr_listadupla));
+
+        at->dim = 1;
+        at->dim_init = malloc(sizeof(int));
+        at->dim_size = malloc(sizeof(int));
+
+        at->dim_init[0] = atoi($1);
+        at->dim_size[0] = atoi($3) - at->dim_init[0] + 1;
+        at->size = at->dim_size[0];
+
         $$ = create_node(@1.first_line, nodo_listadupla, "listadupla", create_node(@1.first_line, nodo_int, $1, NULL, NULL), coringa(":"), create_node(@1.first_line, nodo_int, $3, NULL, NULL), NULL, NULL);
+        $$->attribute = at;
     }
-  | INT_LIT ':' INT_LIT ',' listadupla{
-        // IMPLEMENTAR
+  | INT_LIT ':' INT_LIT ',' listadupla {
+        int i;
+        attr_listadupla * at = malloc(sizeof(attr_listadupla));
+        attr_listadupla * at_last = ((attr_listadupla *) $5->attribute);
+
+        at->dim = at_last->dim + 1;
+        at->dim_init = malloc(sizeof(int) * at->dim);
+        at->dim_size = malloc(sizeof(int) * at->dim);
+
+        at->dim_init[0] = atoi($1);
+        at->dim_size[0] = atoi($3) - at->dim_init[0] + 1;
+        for (i = 0; i < at->dim - 1; i++) {
+            at->dim_init[i+1] = at_last->dim_init[i];
+            at->dim_size[i+1] = at_last->dim_size[i];
+        }
+        at->size = at->dim_size[0] * at_last->size;
+
         $$ = create_node(@1.first_line, nodo_listadupla, "listadupla", create_node(@1.first_line, nodo_int, $1, NULL, NULL), coringa(":"), create_node(@1.first_line, nodo_int, $3, NULL, NULL), coringa(","), $5, NULL, NULL);
+        $$->attribute = at;    
     }
 ;
 
@@ -388,6 +416,60 @@ int NaN(int type) {
 void address(char ** out, int num, char *ap) {
     * out = malloc(sizeof(char) * 8);
     sprintf(* out, "%03d(%s)", num, ap);
+}
+
+void InsereFilhosTabela(Node * ntype, Node * nvar) {
+    if (nvar->type == nodo_idf) {
+        entry_t *e = malloc(sizeof(entry_t));
+        e->name = malloc(sizeof(char)* (strlen(nvar->lexeme) + 1));
+        strcpy(e->name, nvar->lexeme);
+
+        // TIPO UNICO
+        if (ntype->type == nodo_tipounico) {
+            e->type = ((attr_tipounico *) ntype->attribute)->type;
+            e->size = ((attr_tipounico *) ntype->attribute)->size;
+            e->extra = NULL;
+        // TIPO LISTA
+        } else if(ntype->type == nodo_tipolista) {
+            /*constante 'c' pré-calculada para acessar algo no array 
+            int c;
+            listadupla_attr_t *aux = ((tipolista_attr_t *)tipo->attribute)->listadupla;
+            int i;
+            array_attr_t * at = malloc(sizeof(array_attr_t));
+
+            entrada->type = ((tipolista_attr_t *)tipo->attribute)->tipo;
+            entrada->size = ((tipolista_attr_t *)tipo->attribute)->size;*/
+            /*calcula a constante 
+            c = aux->inicio[0];
+            for(i=1; i< aux->tam_arrays; i++)
+            {
+                c = c * aux->size[i] + aux->inicio[i];
+            }
+            c = c * ((tipolista_attr_t *)tipo->attribute)->w;
+            c = desloc - c;
+           
+            at->c = c;
+            at->nd = aux->tam_arrays;
+            at->size = malloc(sizeof(int)* at->nd);
+            for(i=0; i< at->nd; i++)
+            {
+                at->size[i] = aux->size[i];
+            }
+            at->w = ((tipolista_attr_t *)tipo->attribute)->w;
+
+            entrada->extra= at;*/
+        }
+        e->desloc = desloc;
+        desloc += e->size;
+        insert(&s_table, e);
+    } /*
+    else
+    {
+        int filho;
+        for(filho = 0; filho< nb_of_children(decl);
+            filho++)
+            InsereFilhosTabela(child(decl,filho), tipo);
+    }*/
 }
 
 int operation(attr_expr ** ret, char * type, attr_expr * left, attr_expr * right) {

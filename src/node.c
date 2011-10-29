@@ -5,8 +5,6 @@
 #include "node.h"
 #include "nodelist.h"
 
-Node * syntax_tree;
-
 #define ONULL  1
 #define OWIDTH 2
 

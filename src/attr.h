@@ -12,33 +12,32 @@ typedef struct attr {
     struct node_tac *code;
 } attr;
 
-typedef struct attr_tipounico {
+typedef struct {
     int type;
     int size;
 } attr_tipounico;
 
-typedef struct attr_listadupla {
-    int d; /*número de dimensões*/
-    int *d_init; /*inicio[i] é o limite inferior da dimensão i*/
-    int *d_size; /*size[i] é o tamanho da dimensão i*/
-    int size; /*tamanho total de elementos (ainda não multiplicado pelo 
-                      tamanho do tipo*/
+typedef struct {
+    int dim;
+    int * dim_init; /* limite inferior da dimensão i */
+    int * dim_size; /* tamanho da dimensão i */
+    int size;
 } attr_listadupla;
 
-typedef struct attr_tipolista {
+typedef struct {
     int type;
     int size; /*tamanho total ocupado (número de elementos * w)*/
     //int w; /*tamanho de cada elemento*/
     attr_listadupla /* * */listadupla; /*lista das dimensões*/
 } attr_tipolista;
 
-typedef struct attr_expr {
+typedef struct {
     int type;
     char *value; /*temporário a armazenar o cálculo*/
     struct node_tac *code; /*código para calcular*/
 } attr_expr;
 
-typedef struct attr_listaexpr {
+typedef struct {
     attr_expr **expr; /*array de expressões*/
     int lenght; /*número de expressões*/
 } attr_listaexpr;
@@ -53,12 +52,12 @@ typedef struct array_attr_t{
     int w;  /*tamanho de cada elemento
 } array_attr_t; */
 
-typedef struct attr_opera {
+typedef struct {
     char *oper_int; /*nome a ser utilizado quando operando inteiros*/
     char *oper_float; 
 } attr_opera;
 
-typedef struct attr_expbool {
+typedef struct {
     struct node_tac *code; /*código para calcular*/
     //char* t; char* f;
 } attr_expbool;

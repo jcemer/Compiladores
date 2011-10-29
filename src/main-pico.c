@@ -3,7 +3,7 @@
 #include <string.h>
 
 #include "node.h"
-#include "symbol_table.c"
+#include "symbol_table.h"
 #include "lista.h"
 
 /* Programa principal do pico. */
@@ -11,8 +11,8 @@ char* progname;
 int lineno;
 extern FILE* yyin;
 FILE *fp;
-symbol_t s_table;
-int desloc = 0;
+
+extern symbol_t s_table;
 
 int main(int argc, char* argv[]) {
    if (argc != 2) {
@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
    }
 
    progname = argv[0];
-   init_table(&s_table);
+   //init_table(&s_table);
 
    if (!yyparse()) {
       printf("OKAY.\n");
@@ -35,11 +35,14 @@ int main(int argc, char* argv[]) {
       printf("ERROR.\n");
    }
 
-/*
-   fp=fopen("saida.pico", "w+");
+   /*
+   fp = fopen("saida.pico", "w+");
    uncompile(fp, syntax_tree);
    fclose(fp);
+   */
 
+   print_table(s_table);
+/*
    yyin = fopen("saida.pico", "r");
    if (!yyparse()) 
       printf("OKAY.\n");
