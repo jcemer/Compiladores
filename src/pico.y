@@ -23,7 +23,7 @@
     #define SP "SP"
     #define RX "Rx"
 
-    void InsereFilhosTabela(Node *, Node *);
+    void insert_nodes(Node *, Node *);
     void address(char **, int, char *);
     int operation(attr_expr **, char *, attr_expr *, attr_expr *);
 
@@ -119,7 +119,7 @@ declaracoes:
 
 declaracao: 
     tipo ':' listadeclaracao{
-        InsereFilhosTabela((Node *)$1, (Node *)$3);
+        insert_nodes((Node *)$1, (Node *)$3);
         $$ = create_node(@1.first_line, nodo_declaracao, "declaracao", $1, coringa(":"), $3, NULL, NULL);
     }
 ; 
@@ -129,19 +129,20 @@ listadeclaracao:
         $$ = create_node(@1.first_line, nodo_idf, $1, NULL, NULL);
     }
   | IDF ',' listadeclaracao{
-        // IMPLEMENTAR
         $$ = create_node(@1.first_line, nodo_listadeclaracao, "listadeclaracao", create_node(@1.first_line, nodo_idf, $1, NULL, NULL), coringa(","), $3, NULL, NULL);
     }
 ;
 
 tipo: 
-    tipounico{
-        $$ = create_node(@1.first_line, nodo_tipo, "tipo", $1, NULL, NULL);
-        $$->attribute = $1->attribute;
+    tipounico {
+        //$$ = create_node(@1.first_line, nodo_tipo, "tipo", $1, NULL, NULL);
+        //$$->attribute = $1->attribute;
+        $$ = $1;
     } 
-  | tipolista{
-        // IMPLEMENTAR
-        $$ = create_node(@1.first_line, nodo_tipo, "tipo", $1, NULL, NULL); 
+  | tipolista {
+        //$$ = create_node(@1.first_line, nodo_tipo, "tipo", $1, NULL, NULL);
+        //$$->attribute = $1->attribute;
+        $$ = $1;   
     }
 ;
 
@@ -446,7 +447,8 @@ void address(char ** out, int num, char *ap) {
     sprintf(* out, "%03d(%s)", num, ap);
 }
 
-void InsereFilhosTabela(Node * ntype, Node * nvar) {
+void insert_nodes(Node * ntype, Node * nvar) {
+    /* NODO IDF */
     if (nvar->type == nodo_idf) {
         entry_t *e = malloc(sizeof(entry_t));
         e->name = malloc(sizeof(char)* (strlen(nvar->lexeme) + 1));
@@ -459,14 +461,19 @@ void InsereFilhosTabela(Node * ntype, Node * nvar) {
             e->extra = NULL;
         // TIPO LISTA
         } else if(ntype->type == nodo_tipolista) {
+            e->type = ((attr_tipolista *) ntype->attribute)->type;
+            e->size = ((attr_tipolista *) ntype->attribute)->size;
+
             /*constante 'c' pré-calculada para acessar algo no array 
             int c;
-            listadupla_attr_t *aux = ((tipolista_attr_t *)tipo->attribute)->listadupla;
-            int i;
-            array_attr_t * at = malloc(sizeof(array_attr_t));
+            attr_listadupla *aux = ((attr_tipolista *) ntype->attribute)->inner;
 
-            entrada->type = ((tipolista_attr_t *)tipo->attribute)->tipo;
-            entrada->size = ((tipolista_attr_t *)tipo->attribute)->size;*/
+
+
+
+            //int i;
+            //array_attr_t * at = malloc(sizeof(array_attr_t));
+
             /*calcula a constante 
             c = aux->inicio[0];
             for(i=1; i< aux->tam_arrays; i++)
@@ -490,14 +497,13 @@ void InsereFilhosTabela(Node * ntype, Node * nvar) {
         e->desloc = desloc;
         desloc += e->size;
         insert(&s_table, e);
-    } /*
-    else
-    {
-        int filho;
-        for(filho = 0; filho< nb_of_children(decl);
-            filho++)
-            InsereFilhosTabela(child(decl,filho), tipo);
-    }*/
+
+    /* NODO LISTA DECLARACAO */
+    } else if (nvar->type == nodo_listadeclaracao) {
+        int i;
+        for(i = 0; i < nb_of_children(nvar); i++)
+            insert_nodes(ntype, child(nvar, i));
+    }
 }
 
 int operation(attr_expr ** ret, char * type, attr_expr * left, attr_expr * right) {
@@ -532,6 +538,5 @@ int rx_temp(int type) {
         case REAL_TYPE:     rx_tempCount += REAL_SIZE; break;
         case DOUBLE_TYPE:   rx_tempCount += DOUBLE_SIZE; break;
     }
-    //printf("%i", type);
     return ret;
 }
