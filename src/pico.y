@@ -18,7 +18,8 @@
     #define TYPE_MISMATCH_ERROR -20
     #define GET_ERROR 1
     int errorValue;
-    int error(int type);
+    int error(int);
+    int error_undeclared(char *);
 
     #define SP "SP"
     #define RX "Rx"
@@ -265,13 +266,10 @@ acoes:
         $$->attribute = $1->attribute;
     }
   | comando ';' acoes {
-        fprintf(stderr, "oi");
         attr * at = (attr *) malloc(sizeof(attr));
         at->code = NULL;
         cat_tac(&(at->code), &((attr *) $1->attribute)->code);
-        fprintf(stderr, "z\n");
         cat_tac(&(at->code), &((attr *) $3->attribute)->code);
-        fprintf(stderr, "z\n");
 
         $$ = create_node(@1.first_line, nodo_acoes, "acoes", $1, coringa(";"), $3, NULL, NULL);
         $$->attribute = at;
@@ -280,8 +278,19 @@ acoes:
 
 comando: 
     lvalue '=' expr {
-        // IMPLEMENTAR
+        attr * at = (attr *) malloc(sizeof(attr));
+        attr_expr * left = ((attr_expr *) $1->attribute);
+        attr_expr * right = ((attr_expr *) $3->attribute);
+
+        if (left->type != right->type)
+            return error(TYPE_MISMATCH_ERROR);
+
+        at->code = left->code;
+        cat_tac(&(at->code), &(right->code));
+        append_inst_tac(&(at->code), create_inst_tac(left->value, right->value, ":=", ""));
+
         $$ = create_node(@1.first_line, nodo_comando, "comando", $1, coringa("="), $3, NULL, NULL);
+        $$->attribute = at;
     }
   | enunciado { 
         $$ = create_node(@1.first_line, nodo_comando, "comando", $1, NULL, NULL);
@@ -291,8 +300,16 @@ comando:
 
 lvalue: 
     IDF {
-        // IMPLEMENTAR
+        attr_expr *at = malloc(sizeof(attr_expr));
+        entry_t * e = lookup(s_table, $1);
+        if (!e)
+            return error_undeclared($1);
+        address(&(at->value), e->desloc, SP);
+        at->type = e->type;
+        at->code = NULL;
+
         $$ = create_node(@1.first_line, nodo_idf, $1, NULL, NULL);
+        $$->attribute = at;
     }
   | IDF '[' listaexpr ']' {
         // IMPLEMENTAR
@@ -532,6 +549,10 @@ int error(int value) {
     if (value == GET_ERROR)
         return errorValue;
     return errorValue = value;
+}
+int error_undeclared(char * var) {
+    printf("UNDEFINED SYMBOL. A Variavel %s nao foi declarada\n", var);
+    return error(UNDEFINED_SYMBOL_ERROR);
 }
 
 int rx_temp(int type) {

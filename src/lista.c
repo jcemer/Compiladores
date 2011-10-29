@@ -27,7 +27,7 @@ void print_inst_tac(FILE* out, struct tac i) {
     if (!strcmp(i.op, ":="))
         fprintf(out, "%s := %s\n", i.res, i.arg1);
     // PRINT
-    else if (!strcmp(i.res, ""))
+    else if (* i.arg1 == '\0')
         fprintf(out, "%s %s\n", i.op, i.arg2);
     else
         fprintf(out, "%s := %s %s %s\n", i.res, i.arg1, i.op, i.arg2);
