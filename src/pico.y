@@ -177,21 +177,49 @@ tipounico:
 ;
 
 tipolista: 
-    INT '(' listadupla ')'{
-        // IMPLEMENTAR
-        $$ = create_node(@1.first_line, nodo_tipolista, "int", coringa("("), $3, coringa(")"), NULL, NULL); 
+    INT '(' listadupla ')' {
+        attr_tipolista * at = malloc(sizeof(attr_tipolista));
+        attr_listadupla * at_inner = ((attr_listadupla *) $3->attribute);
+
+        at->type = INT_TYPE;
+        at->size = at_inner->size * INT_SIZE;
+        at->inner = at_inner;
+
+        $$ = create_node(@1.first_line, nodo_tipolista, "int", coringa("("), $3, coringa(")"), NULL, NULL);
+        $$->attribute = at;
     }
-  | DOUBLE '(' listadupla ')'{
-        // IMPLEMENTAR
-        $$ = create_node(@1.first_line, nodo_tipolista, "double", coringa("("), $3, coringa(")"), NULL, NULL);  
+  | DOUBLE '(' listadupla ')' {
+        attr_tipolista * at = malloc(sizeof(attr_tipolista));
+        attr_listadupla * at_inner = ((attr_listadupla *) $3->attribute);
+
+        at->type = DOUBLE_TYPE;
+        at->size = at_inner->size * DOUBLE_SIZE;
+        at->inner = at_inner;
+
+        $$ = create_node(@1.first_line, nodo_tipolista, "double", coringa("("), $3, coringa(")"), NULL, NULL);
+        $$->attribute = at;
     }
-  | REAL '(' listadupla ')'{
-        // IMPLEMENTAR
-        $$ = create_node(@1.first_line, nodo_tipolista, "real", coringa("("), $3, coringa(")"), NULL, NULL);    
+  | REAL '(' listadupla ')' {
+        attr_tipolista * at = malloc(sizeof(attr_tipolista));
+        attr_listadupla * at_inner = ((attr_listadupla *) $3->attribute);
+
+        at->type = REAL_TYPE;
+        at->size = at_inner->size * REAL_SIZE;
+        at->inner = at_inner;
+
+        $$ = create_node(@1.first_line, nodo_tipolista, "real", coringa("("), $3, coringa(")"), NULL, NULL);
+        $$->attribute = at;    
     }
-  | CHAR '(' listadupla ')'{
-        // IMPLEMENTAR
-        $$ = create_node(@1.first_line, nodo_tipolista, "char", coringa("("), $3, coringa(")"), NULL, NULL);    
+  | CHAR '(' listadupla ')' {
+        attr_tipolista * at = malloc(sizeof(attr_tipolista));
+        attr_listadupla * at_inner = ((attr_listadupla *) $3->attribute);
+
+        at->type = CHAR_TYPE;
+        at->size = at_inner->size * CHAR_SIZE;
+        at->inner = at_inner;
+
+        $$ = create_node(@1.first_line, nodo_tipolista, "char", coringa("("), $3, coringa(")"), NULL, NULL);
+        $$->attribute = at;
     }
 ;
 

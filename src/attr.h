@@ -28,7 +28,7 @@ typedef struct {
     int type;
     int size; /*tamanho total ocupado (número de elementos * w)*/
     //int w; /*tamanho de cada elemento*/
-    attr_listadupla /* * */listadupla; /*lista das dimensões*/
+    attr_listadupla * inner;
 } attr_tipolista;
 
 typedef struct {
