@@ -19,7 +19,7 @@ typedef int Node_type;
 #define nodo_declaracao       304
 #define nodo_idf              305
 #define nodo_listadeclaracao  306
-#define nodo_tipo             307
+//#define nodo_tipo           307
 #define nodo_tipounico	      308
 #define nodo_tipolista	      309
 #define nodo_listadupla	      310
