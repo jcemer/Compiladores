@@ -249,7 +249,7 @@ listadupla:
 
         at->dim_init[0] = atoi($1);
         at->dim_size[0] = atoi($3) - at->dim_init[0] + 1;
-        for (i = 0; i < at->dim - 1; i++) {
+        for (i = 0; i < at_last->dim; i++) {
             at->dim_init[i+1] = at_last->dim_init[i];
             at->dim_size[i+1] = at_last->dim_size[i];
         }
@@ -319,12 +319,28 @@ lvalue:
 
 listaexpr: 
     expr {
-        // IMPLEMENTAR
+        attr_listaexpr *at = malloc(sizeof(attr_listaexpr));
+        at->lenght = 1;
+        at->expr = malloc(sizeof(attr_expr *));
+        at->expr[0] = (attr_expr *) $1->attribute;
+
         $$ = create_node(@1.first_line, nodo_parametro, "listaexpr", $1, NULL, NULL);
+        $$->attribute = at;
     }
   | expr ',' listaexpr {
-        // IMPLEMENTAR
+        int i;
+        attr_listaexpr * at = malloc(sizeof(attr_listaexpr));
+        attr_listaexpr * at_last = ((attr_listaexpr *) $3->attribute);
+
+        at->lenght = at_last->lenght + 1;
+        at->expr = malloc(sizeof(attr_expr *) * at->lenght);
+        
+        at->expr[0] = (attr_expr *) $1->attribute;
+        for (i = 0; i < at_last->lenght; i++) 
+            at->expr[i+1] = at_last->expr[i];
+
         $$ = create_node(@1.first_line, nodo_parametro, "listaexpr", $1, coringa(","), $3, NULL, NULL);
+        $$->attribute = at;
     }
 ;
 

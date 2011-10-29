@@ -8,6 +8,7 @@
 #define REAL_SIZE 4
 #define DOUBLE_SIZE 8
 
+/* DECLARACOES */
 
 typedef struct {
     int type;
@@ -28,6 +29,7 @@ typedef struct {
     attr_listadupla * inner;
 } attr_tipolista;
 
+/* ACOES */
 
 typedef struct attr {
     struct node_tac *code;
@@ -40,8 +42,8 @@ typedef struct {
 } attr_expr;
 
 typedef struct {
-    attr_expr **expr; /*array de expressões*/
-    int lenght; /*número de expressões*/
+    attr_expr ** expr;
+    int lenght;
 } attr_listaexpr;
 
 /*informações sobre o array a serem armazenadas no campo extra da tabela de
@@ -54,13 +56,4 @@ typedef struct array_attr_t{
     int w;  /*tamanho de cada elemento
 } array_attr_t; */
 
-typedef struct {
-    char *oper_int; /*nome a ser utilizado quando operando inteiros*/
-    char *oper_float; 
-} attr_opera;
-
-typedef struct {
-    struct node_tac *code; /*código para calcular*/
-    //char* t; char* f;
-} attr_expbool;
 

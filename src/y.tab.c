@@ -523,10 +523,10 @@ static const yytype_uint16 yyrline[] =
 {
        0,   100,   100,   105,   111,   114,   120,   127,   130,   136,
      141,   149,   156,   163,   170,   180,   191,   202,   213,   227,
-     241,   264,   268,   280,   295,   302,   314,   321,   325,   332,
-     337,   342,   347,   352,   356,   364,   372,   376,   382,   388,
-     395,   403,   406,   412,   415,   421,   424,   427,   430,   433,
-     436,   439,   442,   445,   448,   451,   454
+     241,   264,   268,   280,   295,   302,   314,   321,   330,   348,
+     353,   358,   363,   368,   372,   380,   388,   392,   398,   404,
+     411,   419,   422,   428,   431,   437,   440,   443,   446,   449,
+     452,   455,   458,   461,   464,   467,   470
 };
 #endif
 
@@ -1737,7 +1737,7 @@ yyreduce:
 
         at->dim_init[0] = atoi((yyvsp[(1) - (5)].string));
         at->dim_size[0] = atoi((yyvsp[(3) - (5)].string)) - at->dim_init[0] + 1;
-        for (i = 0; i < at->dim - 1; i++) {
+        for (i = 0; i < at_last->dim; i++) {
             at->dim_init[i+1] = at_last->dim_init[i];
             at->dim_size[i+1] = at_last->dim_size[i];
         }
@@ -1823,21 +1823,37 @@ yyreduce:
   case 27:
 #line 321 "pico.y"
     {
-        // IMPLEMENTAR
+        attr_listaexpr *at = malloc(sizeof(attr_listaexpr));
+        at->lenght = 1;
+        at->expr = malloc(sizeof(attr_expr *));
+        at->expr[0] = (attr_expr *) (yyvsp[(1) - (1)].no)->attribute;
+
         (yyval.no) = create_node((yylsp[(1) - (1)]).first_line, nodo_parametro, "listaexpr", (yyvsp[(1) - (1)].no), NULL, NULL);
+        (yyval.no)->attribute = at;
     }
     break;
 
   case 28:
-#line 325 "pico.y"
+#line 330 "pico.y"
     {
-        // IMPLEMENTAR
+        int i;
+        attr_listaexpr * at = malloc(sizeof(attr_listaexpr));
+        attr_listaexpr * at_last = ((attr_listaexpr *) (yyvsp[(3) - (3)].no)->attribute);
+
+        at->lenght = at_last->lenght + 1;
+        at->expr = malloc(sizeof(attr_expr *) * at->lenght);
+        
+        at->expr[0] = (attr_expr *) (yyvsp[(1) - (3)].no)->attribute;
+        for (i = 0; i < at_last->lenght; i++) 
+            at->expr[i+1] = at_last->expr[i];
+
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_parametro, "listaexpr", (yyvsp[(1) - (3)].no), coringa(","), (yyvsp[(3) - (3)].no), NULL, NULL);
+        (yyval.no)->attribute = at;
     }
     break;
 
   case 29:
-#line 332 "pico.y"
+#line 348 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_mais, "+", (yyvsp[(1) - (3)].no), coringa("+"), (yyvsp[(3) - (3)].no), NULL, NULL);
         if (operation((attr_expr **) &((yyval.no)->attribute), "ADD", (yyvsp[(1) - (3)].no)->attribute, (yyvsp[(3) - (3)].no)->attribute))
@@ -1846,7 +1862,7 @@ yyreduce:
     break;
 
   case 30:
-#line 337 "pico.y"
+#line 353 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_menos, "-", (yyvsp[(1) - (3)].no), coringa("-"), (yyvsp[(3) - (3)].no), NULL, NULL);
         if (operation((attr_expr **) &((yyval.no)->attribute), "SUB", (yyvsp[(1) - (3)].no)->attribute, (yyvsp[(3) - (3)].no)->attribute))
@@ -1855,7 +1871,7 @@ yyreduce:
     break;
 
   case 31:
-#line 342 "pico.y"
+#line 358 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_multiplicacao, "*", (yyvsp[(1) - (3)].no), coringa("*"), (yyvsp[(3) - (3)].no), NULL, NULL);
         if (operation((attr_expr **) &((yyval.no)->attribute), "MUL", (yyvsp[(1) - (3)].no)->attribute, (yyvsp[(3) - (3)].no)->attribute))
@@ -1864,7 +1880,7 @@ yyreduce:
     break;
 
   case 32:
-#line 347 "pico.y"
+#line 363 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_divisao, "/", (yyvsp[(1) - (3)].no), coringa("/"), (yyvsp[(3) - (3)].no), NULL, NULL);
         if (operation((attr_expr **) &((yyval.no)->attribute), "DIV", (yyvsp[(1) - (3)].no)->attribute, (yyvsp[(3) - (3)].no)->attribute))
@@ -1873,7 +1889,7 @@ yyreduce:
     break;
 
   case 33:
-#line 352 "pico.y"
+#line 368 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_expressao, "()", coringa("("), (yyvsp[(2) - (3)].no), coringa(")"), NULL, NULL);
         (yyval.no)->attribute = (yyvsp[(2) - (3)].no)->attribute;
@@ -1881,7 +1897,7 @@ yyreduce:
     break;
 
   case 34:
-#line 356 "pico.y"
+#line 372 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (1)]).first_line, nodo_int, (yyvsp[(1) - (1)].string), NULL, NULL);
         attr_expr * at = malloc(sizeof(attr_expr));
@@ -1893,7 +1909,7 @@ yyreduce:
     break;
 
   case 35:
-#line 364 "pico.y"
+#line 380 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (1)]).first_line, nodo_float, (yyvsp[(1) - (1)].string), NULL, NULL);
         attr_expr * at = malloc(sizeof(attr_expr));
@@ -1905,7 +1921,7 @@ yyreduce:
     break;
 
   case 36:
-#line 372 "pico.y"
+#line 388 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (1)]).first_line, nodo_expr, "expr", (yyvsp[(1) - (1)].no), NULL, NULL);
         (yyval.no)->attribute = (yyvsp[(1) - (1)].no)->attribute;
@@ -1913,21 +1929,21 @@ yyreduce:
     break;
 
   case 37:
-#line 376 "pico.y"
+#line 392 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (1)]).first_line, nodo_expr, "expr", (yyvsp[(1) - (1)].no), NULL, NULL);
     }
     break;
 
   case 38:
-#line 382 "pico.y"
+#line 398 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (4)]).first_line, nodo_proc, "chamaproc", create_node((yylsp[(1) - (4)]).first_line, nodo_idf, (yyvsp[(1) - (4)].string), NULL, NULL), coringa("("), (yyvsp[(3) - (4)].no), coringa(")"), NULL, NULL);
     }
     break;
 
   case 39:
-#line 388 "pico.y"
+#line 404 "pico.y"
     {
         attr * at = (attr *) malloc(sizeof(attr));
         at->code = ((attr_expr *) (yyvsp[(1) - (1)].no)->attribute)->code;
@@ -1938,7 +1954,7 @@ yyreduce:
     break;
 
   case 40:
-#line 395 "pico.y"
+#line 411 "pico.y"
     {
         attr * at = (attr *) malloc(sizeof(attr));
         at->code = ((attr_expr *) (yyvsp[(3) - (4)].no)->attribute)->code;
@@ -1950,112 +1966,112 @@ yyreduce:
     break;
 
   case 41:
-#line 403 "pico.y"
+#line 419 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (7)]).first_line, nodo_if, "if", coringa("("), (yyvsp[(3) - (7)].no), coringa(")"), coringa("then"), (yyvsp[(6) - (7)].no), (yyvsp[(7) - (7)].no), NULL, NULL);
     }
     break;
 
   case 42:
-#line 406 "pico.y"
+#line 422 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (7)]).first_line, nodo_while, "while", coringa("("), (yyvsp[(3) - (7)].no), coringa(")"), coringa("{"), (yyvsp[(6) - (7)].no), coringa("}"), NULL, NULL);
     }
     break;
 
   case 43:
-#line 412 "pico.y"
+#line 428 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (1)]).first_line, nodo_end, "end", NULL, NULL);
     }
     break;
 
   case 44:
-#line 415 "pico.y"
+#line 431 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_else, "else", (yyvsp[(2) - (3)].no), create_node((yylsp[(1) - (3)]).first_line, nodo_end, "end", NULL, NULL), NULL, NULL);
     }
     break;
 
   case 45:
-#line 421 "pico.y"
+#line 437 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (1)]).first_line, nodo_true, "true", NULL, NULL);
     }
     break;
 
   case 46:
-#line 424 "pico.y"
+#line 440 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (1)]).first_line, nodo_false, "false", NULL, NULL);
     }
     break;
 
   case 47:
-#line 427 "pico.y"
+#line 443 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_expressao, "()", coringa("("), (yyvsp[(2) - (3)].no), coringa(")"), NULL, NULL);
     }
     break;
 
   case 48:
-#line 430 "pico.y"
+#line 446 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_and, "and", (yyvsp[(1) - (3)].no), coringa("&"), (yyvsp[(3) - (3)].no), NULL, NULL);
     }
     break;
 
   case 49:
-#line 433 "pico.y"
+#line 449 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_or, "or", (yyvsp[(1) - (3)].no), coringa("|"), (yyvsp[(3) - (3)].no), NULL, NULL);
     }
     break;
 
   case 50:
-#line 436 "pico.y"
+#line 452 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (2)]).first_line, nodo_not, "not", coringa("!"), (yyvsp[(2) - (2)].no), NULL, NULL);
     }
     break;
 
   case 51:
-#line 439 "pico.y"
+#line 455 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_sup, "sup", (yyvsp[(1) - (3)].no), coringa(">"), (yyvsp[(3) - (3)].no), NULL, NULL);
     }
     break;
 
   case 52:
-#line 442 "pico.y"
+#line 458 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_inf, "inf", (yyvsp[(1) - (3)].no), coringa("<"),(yyvsp[(3) - (3)].no), NULL, NULL);
     }
     break;
 
   case 53:
-#line 445 "pico.y"
+#line 461 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_le, "le", (yyvsp[(1) - (3)].no), coringa("<="), (yyvsp[(3) - (3)].no), NULL, NULL);
     }
     break;
 
   case 54:
-#line 448 "pico.y"
+#line 464 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_ge, "ge", (yyvsp[(1) - (3)].no), coringa(">="), (yyvsp[(3) - (3)].no), NULL, NULL);
     }
     break;
 
   case 55:
-#line 451 "pico.y"
+#line 467 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_eq, "eq", (yyvsp[(1) - (3)].no), coringa("=="), (yyvsp[(3) - (3)].no), NULL, NULL);
     }
     break;
 
   case 56:
-#line 454 "pico.y"
+#line 470 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_ne, "ne", (yyvsp[(1) - (3)].no), coringa("<>"), (yyvsp[(3) - (3)].no), NULL, NULL);
     }
@@ -2063,7 +2079,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 2067 "y.tab.c"
+#line 2083 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2283,7 +2299,7 @@ yyreturn:
 }
 
 
-#line 460 "pico.y"
+#line 476 "pico.y"
 
  /* A partir daqui, insere-se qlqer codigo C necessario.
   */
