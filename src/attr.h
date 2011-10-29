@@ -8,9 +8,6 @@
 #define REAL_SIZE 4
 #define DOUBLE_SIZE 8
 
-typedef struct attr {
-    struct node_tac *code;
-} attr;
 
 typedef struct {
     int type;
@@ -31,10 +28,15 @@ typedef struct {
     attr_listadupla * inner;
 } attr_tipolista;
 
+
+typedef struct attr {
+    struct node_tac *code;
+} attr;
+
 typedef struct {
     int type;
-    char *value; /*temporário a armazenar o cálculo*/
-    struct node_tac *code; /*código para calcular*/
+    char *value;
+    struct node_tac *code;
 } attr_expr;
 
 typedef struct {

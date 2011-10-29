@@ -108,11 +108,9 @@ code:
 
 declaracoes: 
     declaracao ';' {
-        // IMPLEMENTAR
         $$ = create_node(@1.first_line, nodo_declaracoes, "declaracoes", $1, coringa(";"), NULL, NULL); 
     }
   | declaracoes declaracao ';' {
-        // IMPLEMENTAR
         $$ = create_node(@1.first_line, nodo_declaracoes, "declaracoes", $1, $2, coringa(";"), NULL, NULL);
     }
 ;
@@ -267,10 +265,13 @@ acoes:
         $$->attribute = $1->attribute;
     }
   | comando ';' acoes {
+        fprintf(stderr, "oi");
         attr * at = (attr *) malloc(sizeof(attr));
         at->code = NULL;
         cat_tac(&(at->code), &((attr *) $1->attribute)->code);
+        fprintf(stderr, "z\n");
         cat_tac(&(at->code), &((attr *) $3->attribute)->code);
+        fprintf(stderr, "z\n");
 
         $$ = create_node(@1.first_line, nodo_acoes, "acoes", $1, coringa(";"), $3, NULL, NULL);
         $$->attribute = at;
@@ -375,8 +376,12 @@ enunciado:
         $$->attribute = at;
     }
   | PRINTF '(' expr ')' {
-        // IMPLEMENTAR
+        attr * at = (attr *) malloc(sizeof(attr));
+        at->code = ((attr_expr *) $3->attribute)->code;
+        append_inst_tac(&(at->code), create_inst_tac("", "", "PRINT", ((attr_expr *) $3->attribute)->value));
+
         $$ = create_node(@1.first_line, nodo_printf, "print", $3, NULL, NULL);
+        $$->attribute = at;
     }
   | IF '(' expbool ')' THEN acoes fiminstcontrole {
         $$ = create_node(@1.first_line, nodo_if, "if", coringa("("), $3, coringa(")"), coringa("then"), $6, $7, NULL, NULL);
@@ -509,8 +514,7 @@ void insert_nodes(Node * ntype, Node * nvar) {
 int operation(attr_expr ** ret, char * type, attr_expr * left, attr_expr * right) {
     attr_expr * at = (attr_expr *) malloc(sizeof(attr_expr));
     * ret = at;
-    at->code = NULL;
-    cat_tac(&(at->code), &(left->code));
+    at->code = left->code;
     cat_tac(&(at->code), &(right->code));
 
     if(NaN(left->type) || NaN(right->type))

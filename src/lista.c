@@ -26,6 +26,9 @@ struct tac* create_inst_tac(const char* res, const char* arg1, const char* op, c
 void print_inst_tac(FILE* out, struct tac i) {
     if (!strcmp(i.op, ":="))
         fprintf(out, "%s := %s\n", i.res, i.arg1);
+    // PRINT
+    else if (!strcmp(i.res, ""))
+        fprintf(out, "%s %s\n", i.op, i.arg2);
     else
         fprintf(out, "%s := %s %s %s\n", i.res, i.arg1, i.op, i.arg2);
 
@@ -92,12 +95,14 @@ void append_inst_tac(struct node_tac ** code, struct tac * inst) {
     struct node_tac *new = (struct node_tac *) malloc(sizeof(struct node_tac));
     new->number = 0;
     new->inst = inst;
+    new->next = NULL;
+    new->prev = NULL;
     cat_tac(code, &new);
 }
 
 void cat_tac(struct node_tac ** code_a, struct node_tac ** code_b) {
     int i = 1;
-    struct node_tac *temp = *code_a;
+    struct node_tac * temp = * code_a;
 
     if (* code_b) {
         if (* code_a) {
@@ -106,11 +111,11 @@ void cat_tac(struct node_tac ** code_a, struct node_tac ** code_b) {
                i++;
             }
             temp->next = *code_b;
-            (*code_b)->prev = temp;
-            temp = *code_b;
+            (* code_b)->prev = temp;
+            temp = * code_b;
             do {
                 temp->number = i++;
-            } while (temp->next);
+            } while (temp = temp->next);
         } else {
            * code_a = * code_b;
         }
