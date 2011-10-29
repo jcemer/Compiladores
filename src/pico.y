@@ -65,8 +65,8 @@
 %token<string> STR_LIT
 %token<no> PRINTF
 
-%left "+" "-"
-%left "*" "/"
+%left '+' '-'
+%left '*' '/'
 %left OR
 %left AND
 %left NOT
@@ -528,6 +528,7 @@ void insert_nodes(Node * ntype, Node * nvar) {
     }
 }
 
+// OPERATION: add sub mul div
 int operation(attr_expr ** ret, char * type, attr_expr * left, attr_expr * right) {
     attr_expr * at = (attr_expr *) malloc(sizeof(attr_expr));
     * ret = at;
@@ -545,9 +546,13 @@ int operation(attr_expr ** ret, char * type, attr_expr * left, attr_expr * right
     // TODO: FLOAT
     return 0;
 }
+
+// ERROR
 int error(int value) {
-    if (value == GET_ERROR)
+    if (value == GET_ERROR) {
+        printf("Error %i", value);
         return errorValue;
+    }
     return errorValue = value;
 }
 int error_undeclared(char * var) {
@@ -555,6 +560,7 @@ int error_undeclared(char * var) {
     return error(UNDEFINED_SYMBOL_ERROR);
 }
 
+// RX TEMP
 int rx_temp(int type) {
     int ret = rx_tempCount;
     switch (type) {
