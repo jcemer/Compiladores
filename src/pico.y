@@ -13,6 +13,7 @@
     Node* syntax_tree = NULL;
     symbol_t s_table;
     int desloc = 0;
+    int i;
 
     #define UNDEFINED_SYMBOL_ERROR -21
     #define TYPE_MISMATCH_ERROR -20
@@ -247,7 +248,6 @@ listadupla:
         $$->attribute = at;
     }
   | INT_LIT ':' INT_LIT ',' listadupla {
-        int i;
         attr_listadupla * at = malloc(sizeof(attr_listadupla));
         attr_listadupla * at_last = ((attr_listadupla *) $5->attribute);
 
@@ -320,7 +320,6 @@ lvalue:
         $$->attribute = at;
     }
   | IDF '[' listaexpr ']' {
-        int i;
         attr_expr *at = malloc(sizeof(attr_expr));
         attr_listaexpr * at_lista = ((attr_listaexpr *) $3->attribute);
 
@@ -379,7 +378,6 @@ listaexpr:
         $$->attribute = at;
     }
   | expr ',' listaexpr {
-        int i;
         attr_listaexpr * at = malloc(sizeof(attr_listaexpr));
         attr_listaexpr * at_last = ((attr_listaexpr *) $3->attribute);
 
@@ -555,23 +553,22 @@ void insert_nodes(Node * ntype, Node * nvar) {
             e->extra = NULL;
         // TIPO LISTA
         } else if(ntype->type == nodo_tipolista) {
-            int i;
             e->type = ((attr_tipolista *) ntype->attribute)->type;
             e->size = ((attr_tipolista *) ntype->attribute)->size;
 
             attr_tipolista * at = (attr_tipolista *) ntype->attribute;
             attr_listadupla * at_lista = at->inner;
-
+            // extra
             entry_textra * e_extra = malloc(sizeof(entry_textra));
             e_extra->lenght = at_lista->lenght;
             e_extra->type_size = at->type_size;
-
+            // extra / c
             e_extra->c = at_lista->dim_init[0];
             for(i = 1; i < at_lista->lenght; i++)
                 e_extra->c = (e_extra->c * at_lista->dim_size[i]) + at_lista->dim_init[i];
             e_extra->c *= -at->type_size;
             e_extra->c += desloc;
-
+            // extra / dim_size
             e_extra->dim_size = malloc(sizeof(int) * e_extra->lenght);
             for(i = 0; i < e_extra->lenght; i++)
                 e_extra->dim_size[i] = at_lista->dim_size[i];
@@ -584,7 +581,6 @@ void insert_nodes(Node * ntype, Node * nvar) {
 
     /* NODO LISTA DECLARACAO */
     } else if (nvar->type == nodo_listadeclaracao) {
-        int i;
         for(i = 0; i < nb_of_children(nvar); i++)
             insert_nodes(ntype, child(nvar, i));
     }
