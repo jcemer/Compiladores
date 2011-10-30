@@ -16,7 +16,7 @@ typedef struct {
 } attr_tipounico;
 
 typedef struct {
-    int dim;
+    int lenght;
     int * dim_init; /* limite inferior da dimensão i */
     int * dim_size; /* tamanho da dimensão i */
     int size;
@@ -24,10 +24,17 @@ typedef struct {
 
 typedef struct {
     int type;
-    int size; /*tamanho total ocupado (número de elementos * w)*/
-    //int w; /*tamanho de cada elemento*/
+    int type_size;
+    int size;
     attr_listadupla * inner;
 } attr_tipolista;
+
+typedef struct {
+    int lenght;
+    int type_size;
+    int * dim_size;
+    int c;
+} entry_textra;
 
 /* ACOES */
 

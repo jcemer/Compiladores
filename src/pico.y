@@ -16,20 +16,24 @@
 
     #define UNDEFINED_SYMBOL_ERROR -21
     #define TYPE_MISMATCH_ERROR -20
+    #define ARRAY_DIM_ERROR -22
+    #define NOT_ARRAY_ERROR - 23
     #define GET_ERROR 1
-    int errorValue;
-    int error(int);
-    int error_undeclared(char *);
 
     #define SP "SP"
     #define RX "Rx"
 
-    void insert_nodes(Node *, Node *);
+    const char * itoa(int);
     void address(char **, int, char *);
-    int operation(attr_expr **, char *, attr_expr *, attr_expr *);
 
-    int rx_tempCount = 0;
+    void insert_nodes(Node *, Node *);
+    int operation(attr_expr **, char *, attr_expr *, attr_expr *);
     int rx_temp(int type);
+
+    int errorValue;
+    int error(int);
+    int error_undeclared(char *);
+    int error_array(int, char *);
 %}
 
 %union {
@@ -182,6 +186,7 @@ tipolista:
         attr_listadupla * at_inner = ((attr_listadupla *) $3->attribute);
 
         at->type = INT_TYPE;
+        at->type_size = INT_SIZE;
         at->size = at_inner->size * INT_SIZE;
         at->inner = at_inner;
 
@@ -193,6 +198,7 @@ tipolista:
         attr_listadupla * at_inner = ((attr_listadupla *) $3->attribute);
 
         at->type = DOUBLE_TYPE;
+        at->type_size = DOUBLE_SIZE;
         at->size = at_inner->size * DOUBLE_SIZE;
         at->inner = at_inner;
 
@@ -204,6 +210,7 @@ tipolista:
         attr_listadupla * at_inner = ((attr_listadupla *) $3->attribute);
 
         at->type = REAL_TYPE;
+        at->type_size = REAL_SIZE;
         at->size = at_inner->size * REAL_SIZE;
         at->inner = at_inner;
 
@@ -215,6 +222,7 @@ tipolista:
         attr_listadupla * at_inner = ((attr_listadupla *) $3->attribute);
 
         at->type = CHAR_TYPE;
+        at->type_size = CHAR_SIZE;
         at->size = at_inner->size * CHAR_SIZE;
         at->inner = at_inner;
 
@@ -227,7 +235,7 @@ listadupla:
     INT_LIT ':' INT_LIT {
         attr_listadupla * at = malloc(sizeof(attr_listadupla));
 
-        at->dim = 1;
+        at->lenght = 1;
         at->dim_init = malloc(sizeof(int));
         at->dim_size = malloc(sizeof(int));
 
@@ -243,13 +251,13 @@ listadupla:
         attr_listadupla * at = malloc(sizeof(attr_listadupla));
         attr_listadupla * at_last = ((attr_listadupla *) $5->attribute);
 
-        at->dim = at_last->dim + 1;
-        at->dim_init = malloc(sizeof(int) * at->dim);
-        at->dim_size = malloc(sizeof(int) * at->dim);
+        at->lenght = at_last->lenght + 1;
+        at->dim_init = malloc(sizeof(int) * at->lenght);
+        at->dim_size = malloc(sizeof(int) * at->lenght);
 
         at->dim_init[0] = atoi($1);
         at->dim_size[0] = atoi($3) - at->dim_init[0] + 1;
-        for (i = 0; i < at_last->dim; i++) {
+        for (i = 0; i < at_last->lenght; i++) {
             at->dim_init[i+1] = at_last->dim_init[i];
             at->dim_size[i+1] = at_last->dim_size[i];
         }
@@ -312,8 +320,51 @@ lvalue:
         $$->attribute = at;
     }
   | IDF '[' listaexpr ']' {
-        // IMPLEMENTAR
+        int i;
+        attr_expr *at = malloc(sizeof(attr_expr));
+        attr_listaexpr * at_lista = ((attr_listaexpr *) $3->attribute);
+
+        entry_t * e = lookup(s_table, $1);
+        if (!e)
+            return error_undeclared($1);
+        at->type = e->type;
+        at->code = NULL;
+
+        // EXTRA
+        entry_textra * e_extra = ((entry_textra *) e->extra);
+        if (!e_extra)
+            return error_array(NOT_ARRAY_ERROR, $1);
+        if (at_lista->lenght > e_extra->lenght)
+            return error_array(ARRAY_DIM_ERROR, $1);
+
+        // CHECK LISTAEXPR: type and cat codes
+        for (i = 0; i < at_lista->lenght; i++) {
+            if (at_lista->expr[i]->type != INT_TYPE)
+                return error(TYPE_MISMATCH_ERROR);
+            cat_tac(&(at->code), &(at_lista->expr[i]->code));
+        }
+
+        char * res;
+        address(&res, rx_temp(INT_TYPE), RX);
+        // e
+        append_inst_tac(&(at->code), create_inst_tac(res, at_lista->expr[0]->value, ":=", ""));
+        for (i = 1; i< at_lista->lenght; i++) {
+            append_inst_tac(&(at->code), create_inst_tac(res, res, "MUL", itoa(e_extra->dim_size[i])));
+            append_inst_tac(&(at->code), create_inst_tac(res, res, "ADD", at_lista->expr[i]->value));
+        }
+        // e * k
+        append_inst_tac(&(at->code), create_inst_tac(res, res, "MUL", itoa(e_extra->type_size)));
+        // e * k + c
+        append_inst_tac(&(at->code), 
+            create_inst_tac(res, res, e_extra->c > 0 ? "ADD" : "SUB", itoa(abs(e_extra->c)))
+        );
+
+        at->value = malloc(sizeof(char) * 17);
+        strcpy(at->value, res);
+        strcat(at->value, "(000(SP))");
+
         $$ = create_node(@1.first_line, nodo_lvalue, "lvalue", create_node(@1.first_line, nodo_idf, $1, NULL, NULL), coringa("["), $3, coringa("]"), NULL, NULL);
+        $$->attribute = at;
     }
 ;
 
@@ -480,6 +531,11 @@ expbool:
 int NaN(int type) {
     return type == CHAR_TYPE; // not a number
 }
+const char * itoa(int value) {
+    static char buffer [33];
+    sprintf(buffer, "%d", value);
+    return buffer;
+}
 void address(char ** out, int num, char *ap) {
     * out = malloc(sizeof(char) * 8);
     sprintf(* out, "%03d(%s)", num, ap);
@@ -499,38 +555,28 @@ void insert_nodes(Node * ntype, Node * nvar) {
             e->extra = NULL;
         // TIPO LISTA
         } else if(ntype->type == nodo_tipolista) {
+            int i;
             e->type = ((attr_tipolista *) ntype->attribute)->type;
             e->size = ((attr_tipolista *) ntype->attribute)->size;
 
-            /*constante 'c' pré-calculada para acessar algo no array 
-            int c;
-            attr_listadupla *aux = ((attr_tipolista *) ntype->attribute)->inner;
+            attr_tipolista * at = (attr_tipolista *) ntype->attribute;
+            attr_listadupla * at_lista = at->inner;
 
+            entry_textra * e_extra = malloc(sizeof(entry_textra));
+            e_extra->lenght = at_lista->lenght;
+            e_extra->type_size = at->type_size;
 
+            e_extra->c = at_lista->dim_init[0];
+            for(i = 1; i < at_lista->lenght; i++)
+                e_extra->c = (e_extra->c * at_lista->dim_size[i]) + at_lista->dim_init[i];
+            e_extra->c *= -at->type_size;
+            e_extra->c += desloc;
 
+            e_extra->dim_size = malloc(sizeof(int) * e_extra->lenght);
+            for(i = 0; i < e_extra->lenght; i++)
+                e_extra->dim_size[i] = at_lista->dim_size[i];
 
-            //int i;
-            //array_attr_t * at = malloc(sizeof(array_attr_t));
-
-            /*calcula a constante 
-            c = aux->inicio[0];
-            for(i=1; i< aux->tam_arrays; i++)
-            {
-                c = c * aux->size[i] + aux->inicio[i];
-            }
-            c = c * ((tipolista_attr_t *)tipo->attribute)->w;
-            c = desloc - c;
-           
-            at->c = c;
-            at->nd = aux->tam_arrays;
-            at->size = malloc(sizeof(int)* at->nd);
-            for(i=0; i< at->nd; i++)
-            {
-                at->size[i] = aux->size[i];
-            }
-            at->w = ((tipolista_attr_t *)tipo->attribute)->w;
-
-            entrada->extra= at;*/
+            e->extra = e_extra;
         }
         e->desloc = desloc;
         desloc += e->size;
@@ -563,6 +609,19 @@ int operation(attr_expr ** ret, char * type, attr_expr * left, attr_expr * right
     return 0;
 }
 
+// RX TEMP
+int rx_temp(int type) {
+    static int tmp = 0;
+    int ret = tmp;
+    switch (type) {
+        case CHAR_TYPE:     tmp += CHAR_SIZE; break;
+        case INT_TYPE:      tmp += INT_SIZE; break;
+        case REAL_TYPE:     tmp += REAL_SIZE; break;
+        case DOUBLE_TYPE:   tmp += DOUBLE_SIZE; break;
+    }
+    return ret;
+}
+
 // ERROR
 int error(int value) {
     if (value == GET_ERROR) {
@@ -575,15 +634,13 @@ int error_undeclared(char * var) {
     printf("UNDEFINED SYMBOL. A Variavel %s nao foi declarada\n", var);
     return error(UNDEFINED_SYMBOL_ERROR);
 }
-
-// RX TEMP
-int rx_temp(int type) {
-    int ret = rx_tempCount;
+int error_array(int type, char * var) {
     switch (type) {
-        case CHAR_TYPE:     rx_tempCount += CHAR_SIZE; break;
-        case INT_TYPE:      rx_tempCount += INT_SIZE; break;
-        case REAL_TYPE:     rx_tempCount += REAL_SIZE; break;
-        case DOUBLE_TYPE:   rx_tempCount += DOUBLE_SIZE; break;
+        case NOT_ARRAY_ERROR:
+            printf("ERRO! Variavel %s nao eh um array!\n", var); break;
+        case ARRAY_DIM_ERROR:
+            printf("ERRO! Array %s indexado em mais dimensoes do que possui!\n", var); break;
     }
-    return ret;
+    return error(type);
 }
+
