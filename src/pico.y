@@ -105,7 +105,6 @@ code:
     declaracoes acoes{
         syntax_tree = $$ = create_node(@1.first_line, nodo_programa, "code", $1, $2, NULL, NULL);
         $$->attribute = $2->attribute;
-        print_tac(stdout, ((attr *) $$->attribute)->code);
     }
   | acoes{ 
         syntax_tree = $$ = $1;
