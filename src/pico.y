@@ -347,7 +347,7 @@ lvalue:
         address(&res, rx_temp(INT_TYPE), RX);
         // e
         append_inst_tac(&(at->code), create_inst_tac(res, at_lista->expr[0]->value, ":=", ""));
-        for (i = 1; i< at_lista->lenght; i++) {
+        for (i = 1; i < at_lista->lenght; i++) {
             append_inst_tac(&(at->code), create_inst_tac(res, res, "MUL", itoa(e_extra->dim_size[i])));
             append_inst_tac(&(at->code), create_inst_tac(res, res, "ADD", at_lista->expr[i]->value));
         }
@@ -360,7 +360,7 @@ lvalue:
 
         at->value = malloc(sizeof(char) * 17);
         strcpy(at->value, res);
-        strcat(at->value, "(000(SP))");
+        strcat(at->value, " (000(SP))");
 
         $$ = create_node(@1.first_line, nodo_lvalue, "lvalue", create_node(@1.first_line, nodo_idf, $1, NULL, NULL), coringa("["), $3, coringa("]"), NULL, NULL);
         $$->attribute = at;

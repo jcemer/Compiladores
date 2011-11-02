@@ -1850,7 +1850,7 @@ yyreduce:
         address(&res, rx_temp(INT_TYPE), RX);
         // e
         append_inst_tac(&(at->code), create_inst_tac(res, at_lista->expr[0]->value, ":=", ""));
-        for (i = 1; i< at_lista->lenght; i++) {
+        for (i = 1; i < at_lista->lenght; i++) {
             append_inst_tac(&(at->code), create_inst_tac(res, res, "MUL", itoa(e_extra->dim_size[i])));
             append_inst_tac(&(at->code), create_inst_tac(res, res, "ADD", at_lista->expr[i]->value));
         }
@@ -1863,7 +1863,7 @@ yyreduce:
 
         at->value = malloc(sizeof(char) * 17);
         strcpy(at->value, res);
-        strcat(at->value, "(000(SP))");
+        strcat(at->value, " (000(SP))");
 
         (yyval.no) = create_node((yylsp[(1) - (4)]).first_line, nodo_lvalue, "lvalue", create_node((yylsp[(1) - (4)]).first_line, nodo_idf, (yyvsp[(1) - (4)].string), NULL, NULL), coringa("["), (yyvsp[(3) - (4)].no), coringa("]"), NULL, NULL);
         (yyval.no)->attribute = at;
