@@ -53,6 +53,7 @@ typedef struct {
     int lenght;
 } attr_listaexpr;
 
+
 /*informações sobre o array a serem armazenadas no campo extra da tabela de
  * símbolos
 typedef struct array_attr_t{

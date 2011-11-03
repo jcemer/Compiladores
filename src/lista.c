@@ -31,41 +31,6 @@ void print_inst_tac(FILE* out, struct tac i) {
         fprintf(out, "%s %s\n", i.op, i.arg2);
     else
         fprintf(out, "%s := %s %s %s\n", i.res, i.arg1, i.op, i.arg2);
-
-/*
-
-   char *rotulo = malloc(sizeof(char)*4);
-  if(i.type == TACTYPE_LABEL) {
-    fprintf(out, "%s:\n", i.arg1);
-  }
-  else {
-    if(ordem < 10)
-        sprintf(rotulo, "00%d", ordem);
-    else if(ordem < 100)
-        sprintf(rotulo, "0%d", ordem);
-    else 
-        sprintf(rotulo, "%d", ordem);
-    fprintf(out, "%s:   ", rotulo);
-    if(i.type == TACTYPE_FPRINT) {
-        fprintf(out, "FPRINT %s\n", i.res);
-    }
-    if(i.type == TACTYPE_PRINT) {
-        fprintf(out, "PRINT %s\n", i.res);
-    }
-    if(i.type == TACTYPE_ATTRIB) {
-        if(strcmp(i.op, ":=") == 0)
-            fprintf(out, "%s := %s\n", i.res, i.arg1);
-        else
-            fprintf(out, "%s := %s %s %s\n", i.res, i.arg1, i.op, i.arg2);
-    }
-
-    if(i.type == TACTYPE_GOTO) {
-      fprintf(out, "GOTO %s\n", i.arg1);
-    }
-    if(i.type == TACTYPE_RELOP) {
-      fprintf(out, "IF %s %s %s GOTO %s\n", i.arg1, i.op, i.arg2, i.res);
-    }
-  }*/
 }
 
 /** \brief Imprime no arquivo apontado por 'out' o conteudo da lista apontada

@@ -12,6 +12,7 @@
 char* progname;
 int lineno;
 extern FILE* yyin;
+extern int desloc;
 FILE *fp;
 
 extern symbol_t s_table;
@@ -41,8 +42,10 @@ int main(int argc, char* argv[]) {
    progname = argv[0];
    if (!yyparse()) {
       printf("OKAY.\n");
-      if (ftac && (fp = fopen(ftac, "w+")))
+      if (ftac && (fp = fopen(ftac, "w+"))) {
+         fprintf(fp, "%d\n%d\n", desloc, rx_temp(0));
          print_tac(fp, ((attr *) syntax_tree->attribute)->code);
+      }
    } else { 
       printf("ERROR.\n");
    }
