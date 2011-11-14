@@ -1,2 +1,3 @@
-double:x ;
-x = 2.0; 
+int:z,xxx,i,j;
+int(0:9,0:19):a;
+z = a[i,j];

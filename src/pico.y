@@ -345,9 +345,11 @@ lvalue:
         char * res;
         address(&res, rx_temp(INT_TYPE), RX);
         // e
-        append_inst_tac(&(at->code), create_inst_tac(res, at_lista->expr[0]->value, ":=", ""));
+        if (at_lista->lenght == 1)
+            append_inst_tac(&(at->code), create_inst_tac(res, at_lista->expr[0]->value, ":=", ""));
+
         for (i = 1; i < at_lista->lenght; i++) {
-            append_inst_tac(&(at->code), create_inst_tac(res, res, "MUL", itoa(e_extra->dim_size[i])));
+            append_inst_tac(&(at->code), create_inst_tac(res, i == 1 ? at_lista->expr[0]->value : res, "MUL", itoa(e_extra->dim_size[i])));
             append_inst_tac(&(at->code), create_inst_tac(res, res, "ADD", at_lista->expr[i]->value));
         }
         // e * k
