@@ -1,0 +1,9 @@
+/** Expressao basica (mul). Should print 21. */
+int: tmp;
+real: x, y, z;
+int: a, b;
+
+a = 7;
+b = 3;
+a = a * b;
+print(a);

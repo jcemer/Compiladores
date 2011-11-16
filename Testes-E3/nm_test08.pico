@@ -1,0 +1,10 @@
+/** Expressao basica (parenteses). Should print 6. */
+int: tmp, xyu;
+int: a;
+real: x ;
+int: b;
+
+a = 6;
+b = 3;
+a = b*(4-2);
+print(a);
