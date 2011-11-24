@@ -359,9 +359,15 @@ lvalue:
             create_inst_tac(res, res, e_extra->c > 0 ? "ADD" : "SUB", itoa(abs(e_extra->c)))
         );
 
-        at->value = malloc(sizeof(char) * 17);
-        strcpy(at->value, res);
-        strcat(at->value, " (000(SP))");
+        char * ret;
+        address(&ret, rx_temp(INT_TYPE), RX);
+
+        char * right = malloc(sizeof(char) * 17);
+        strcpy(right, res);
+        strcat(right, " (000(SP))");
+
+        append_inst_tac(&(at->code), create_inst_tac(ret, right, ":=", ""));
+        at->value = ret;
 
         $$ = create_node(@1.first_line, nodo_lvalue, "lvalue", create_node(@1.first_line, nodo_idf, $1, NULL, NULL), coringa("["), $3, coringa("]"), NULL, NULL);
         $$->attribute = at;
