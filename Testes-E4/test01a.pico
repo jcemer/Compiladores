@@ -1,0 +1,4 @@
+/** Atribuicao em x[0]. Should print 10. */
+int(0:0) : x;
+x[0] = 10;
+print(x[0]);

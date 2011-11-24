@@ -1,0 +1,4 @@
+/** Array de 2 dims em (3:3, 7:7). Should print 10. */
+int(3:3, 7:7) : x;
+x[3,7] = 10;
+print(x[3,7]);

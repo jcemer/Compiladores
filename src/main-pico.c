@@ -17,6 +17,12 @@ FILE *fp;
 
 extern symbol_t s_table;
 
+
+/* ADICIONAIS */
+// IMPRMIR NO TAC O NOME DAS VARIAVEIS
+// TESTAR SE VARIAVEL JA ESTA DECLARADA ANTES DE DECLARAR
+
+
 int main(int argc, char* argv[]) {
    int opt, p_table = 0;
    char * ftac = NULL;

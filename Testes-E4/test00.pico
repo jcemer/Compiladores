@@ -1,0 +1,11 @@
+/** Etapa 3, o retorno. Should print 210\n19. */
+int: tmp, xyu;
+int: a, b;
+real: x;
+
+a = 5;
+b = 3;
+tmp = (((((((((((1+a)*2)-2)*2)+1)*4)+4)/4)+1)-2)*10);
+print(tmp);
+
+print(10 + 5*2 - 2/2);

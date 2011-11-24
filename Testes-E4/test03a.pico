@@ -1,0 +1,4 @@
+/** Array de 3 dims. Should print 10. */
+int (0:0, 0:0, 0:0) : x;
+x[0,0,0] = 10;
+print( x[0,0,0] );
