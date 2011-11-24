@@ -13,7 +13,6 @@
     Node* syntax_tree = NULL;
     symbol_t s_table;
     int desloc = 0;
-    int i;
 
     #define UNDEFINED_SYMBOL_ERROR -21
     #define TYPE_MISMATCH_ERROR -20
@@ -256,6 +255,7 @@ listadupla:
 
         at->dim_init[0] = atoi($1);
         at->dim_size[0] = atoi($3) - at->dim_init[0] + 1;
+        int i;
         for (i = 0; i < at_last->lenght; i++) {
             at->dim_init[i+1] = at_last->dim_init[i];
             at->dim_size[i+1] = at_last->dim_size[i];
@@ -336,6 +336,7 @@ lvalue:
             return error_array(ARRAY_DIM_ERROR, $1);
 
         // CHECK LISTAEXPR: type and cat codes
+        int i;
         for (i = 0; i < at_lista->lenght; i++) {
             if (at_lista->expr[i]->type != INT_TYPE)
                 return error(TYPE_MISMATCH_ERROR);
@@ -392,6 +393,7 @@ listaexpr:
         at->expr = malloc(sizeof(attr_expr *) * at->lenght);
         
         at->expr[0] = (attr_expr *) $1->attribute;
+        int i;
         for (i = 0; i < at_last->lenght; i++) 
             at->expr[i+1] = at_last->expr[i];
 
@@ -547,6 +549,7 @@ void address(char ** out, int num, char *ap) {
 }
 
 void insert_nodes(Node * ntype, Node * nvar) {
+    int i;
     /* NODO IDF */
     if (nvar->type == nodo_idf) {
         entry_t *e = malloc(sizeof(entry_t));

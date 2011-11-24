@@ -1,4 +1,4 @@
-/** Fib(0)..Fib(4) in-place. Should print 1\n1\n2\n3\n5\n8. */
+
 int(0:1) : fib, tmp;
 
 fib[0] = 1;

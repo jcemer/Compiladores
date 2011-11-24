@@ -4,7 +4,7 @@ echo -n "Digite o Nome do Arquivo de teste: "
 #read _NAME
 
 printf "\n \n #### Resultado da Compilacao #### \n"
-./src/pico -o output.tac ./Testes-E4/test01a.pico
+./src/pico -o output.tac ./Testes-E4/test20a.pico
 
 printf "\n \n #### Saida da Execucao do script Python #### \n"
 python tac2x86.py output.tac 
