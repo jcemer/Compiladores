@@ -436,28 +436,19 @@ expr:
         at->type = REAL_TYPE;
         at->code = NULL;
         $$->attribute = at;
-    }    
+    }
   | lvalue {
         attr_expr * at = malloc(sizeof(attr_expr));
-        
-        at->type = ((attr_expr *) $1->attribute)->type;
-        at->code = ((attr_expr *) $1->attribute)->code;
-        
+        attr_expr * at_lvalue = (attr_expr *) $1->attribute;
         char * res;
-        address(&res, rx_temp(INT_TYPE), RX);
-        append_inst_tac(&(at->code), create_inst_tac(res, ((attr_expr *) $1->attribute)->value, ":=", ""));
         
+        at->type = at_lvalue->type;
+        at->code = at_lvalue->code;
+        append_inst_tac(&(at->code), create_inst_tac(res, at_lvalue->value, ":=", ""));
+        
+        address(&res, rx_temp(INT_TYPE), RX);
         at->value = res;
-
-        // 
-
-        /*char * right = malloc(sizeof(char) * 17);
-        strcpy(right, res);
-        strcat(right, " (000(SP))");
-
-        append_inst_tac(&(at->code), create_inst_tac(ret, right, ":=", ""));
-        at->value = ret;*/
-      
+        
         $$ = create_node(@1.first_line, nodo_expr, "expr", $1, NULL, NULL);
         $$->attribute = at;
     }
