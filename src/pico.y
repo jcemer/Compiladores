@@ -359,16 +359,10 @@ lvalue:
         append_inst_tac(&(at->code), 
             create_inst_tac(res, res, e_extra->c > 0 ? "ADD" : "SUB", itoa(abs(e_extra->c)))
         );
-
-        char * ret;
-        address(&ret, rx_temp(INT_TYPE), RX);
-
-        char * right = malloc(sizeof(char) * 17);
-        strcpy(right, res);
-        strcat(right, " (000(SP))");
-
-        append_inst_tac(&(at->code), create_inst_tac(ret, right, ":=", ""));
-        at->value = ret;
+        
+        at->value = malloc(sizeof(char) * 17);
+        strcpy(at->value, res);
+        strcat(at->value, " (000(SP))");
 
         $$ = create_node(@1.first_line, nodo_lvalue, "lvalue", create_node(@1.first_line, nodo_idf, $1, NULL, NULL), coringa("["), $3, coringa("]"), NULL, NULL);
         $$->attribute = at;
@@ -444,8 +438,28 @@ expr:
         $$->attribute = at;
     }    
   | lvalue {
+        attr_expr * at = malloc(sizeof(attr_expr));
+        
+        at->type = ((attr_expr *) $1->attribute)->type;
+        at->code = ((attr_expr *) $1->attribute)->code;
+        
+        char * res;
+        address(&res, rx_temp(INT_TYPE), RX);
+        append_inst_tac(&(at->code), create_inst_tac(res, ((attr_expr *) $1->attribute)->value, ":=", ""));
+        
+        at->value = res;
+
+        // 
+
+        /*char * right = malloc(sizeof(char) * 17);
+        strcpy(right, res);
+        strcat(right, " (000(SP))");
+
+        append_inst_tac(&(at->code), create_inst_tac(ret, right, ":=", ""));
+        at->value = ret;*/
+      
         $$ = create_node(@1.first_line, nodo_expr, "expr", $1, NULL, NULL);
-        $$->attribute = $1->attribute;
+        $$->attribute = at;
     }
   | chamaproc {
         $$ = create_node(@1.first_line, nodo_expr, "expr", $1, NULL, NULL);
