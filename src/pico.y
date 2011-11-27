@@ -22,13 +22,24 @@
 
     #define SP "SP"
     #define RX "Rx"
+    
+    #define BOOL_LENGHT 8
+    char bool[BOOL_LENGHT][3] = {
+        "<",    ">=",
+        ">",    "<=", 
+        "==",   "!=",
+        "&",    "|"
+    };
 
     const char * itoa(int);
     void address(char **, int, char *);
 
     void insert_nodes(Node *, Node *);
+    void ifbool(attr *, attr_exprbool *, int, char *, char *);
     int operation(attr_expr **, char *, attr_expr *, attr_expr *);
-    int rx_temp(int type);
+    int operation_bool(attr_exprbool **, char *, attr_expr *, attr_expr *);
+    int rx_temp(int);
+    void label_temp(char **, char *);
 
     int errorValue;
     int error(int);
@@ -444,9 +455,9 @@ expr:
         
         at->type = at_lvalue->type;
         at->code = at_lvalue->code;
-        append_inst_tac(&(at->code), create_inst_tac(res, at_lvalue->value, ":=", ""));
         
         address(&res, rx_temp(INT_TYPE), RX);
+        append_inst_tac(&(at->code), create_inst_tac(res, at_lvalue->value, ":=", ""));
         at->value = res;
         
         $$ = create_node(@1.first_line, nodo_expr, "expr", $1, NULL, NULL);
@@ -474,13 +485,55 @@ enunciado:
   | PRINTF '(' expr ')' {
         attr * at = (attr *) malloc(sizeof(attr));
         at->code = ((attr_expr *) $3->attribute)->code;
-        append_inst_tac(&(at->code), create_inst_tac("", "", "PRINT", ((attr_expr *) $3->attribute)->value));
+        append_inst_tac(&(at->code), create_inst_tac("", ((attr_expr *) $3->attribute)->value, "PRINT", ""));
 
         $$ = create_node(@1.first_line, nodo_printf, "print", $3, NULL, NULL);
         $$->attribute = at;
     }
   | IF '(' expbool ')' THEN acoes fiminstcontrole {
+        attr * at = (attr *) malloc(sizeof(attr));
+        attr_exprbool * at_bool = (attr_exprbool *) $3->attribute;
+        attr * at_acoes = (attr *) $6->attribute;
+        at->code = NULL;
+        
+        /*
+            a AND b                         a OR b
+                IF a GOTO label_inner           IF a GOTO label_ok
+                GOTO label_er                   [GOTO label_inner]
+              label_inner:                    label_inner:
+                IF b GOTO label_ok              IF b GOTO label_ok
+                GOTO label_er                   GOTO label_er
+              label_ok:                       label_ok:
+                TRUE                            TRUE
+              label_er:                       label_er:
+                FALSE                           FALSE
+        */
+        
+        char * label_ok, * label_er, * label_end;
+        label_temp(&label_ok, "OK");
+        label_temp(&label_er, "ER");
+        
+        ifbool(at, at_bool, 0, label_ok, label_er);
+        
+        append_inst_tac(&(at->code), create_inst_tac("", label_ok, "LABEL", ""));
+        cat_tac(&(at->code), &(at_acoes->code));
+        
+        // jump else
+        if ($7->attribute) {
+            label_temp(&label_end, "XX");
+            append_inst_tac(&(at->code), create_inst_tac("", label_end, "GOTO", ""));
+        }
+        append_inst_tac(&(at->code), create_inst_tac("", label_er, "LABEL", ""));
+        
+        // else
+        if ($7->attribute) {
+            attr * at_acoes_else = (attr *) $7->attribute;
+            cat_tac(&(at->code), &(at_acoes_else->code));
+            append_inst_tac(&(at->code), create_inst_tac("", label_end, "LABEL", ""));
+        }
+        
         $$ = create_node(@1.first_line, nodo_if, "if", coringa("("), $3, coringa(")"), coringa("then"), $6, $7, NULL, NULL);
+        $$->attribute = at;
     }
   | WHILE '(' expbool ')' '{' acoes '}' {
         $$ = create_node(@1.first_line, nodo_while, "while", coringa("("), $3, coringa(")"), coringa("{"), $6, coringa("}"), NULL, NULL);
@@ -490,48 +543,101 @@ enunciado:
 fiminstcontrole: 
     END {
         $$ = create_node(@1.first_line, nodo_end, "end", NULL, NULL);
+        $$->attribute = NULL;
     }
   | ELSE acoes END {
         $$ = create_node(@1.first_line, nodo_else, "else", $2, create_node(@1.first_line, nodo_end, "end", NULL, NULL), NULL, NULL);
+        $$->attribute = $2->attribute;
     }
 ;
 
 expbool: 
-    TRUE {
+    TRUE { // 1 == 1
+        attr_exprbool * at = (attr_exprbool *) malloc(sizeof(attr_exprbool));
+        
+        at->type = "==";
+        at->code = NULL;
+        at->left = at->right = "1";
+        
         $$ = create_node(@1.first_line, nodo_true, "true", NULL, NULL);
+        $$->attribute = at;
     }
-  | FALSE {
+  | FALSE { // 1 <> 1
+        attr_exprbool * at = (attr_exprbool *) malloc(sizeof(attr_exprbool));
+        
+        at->type = "<>";
+        at->code = NULL;
+        at->left = at->right = "1";
+        
         $$ = create_node(@1.first_line, nodo_false, "false", NULL, NULL);
+        $$->attribute = at;
     }
   | '(' expbool ')' {
         $$ = create_node(@1.first_line, nodo_expressao, "()", coringa("("), $2, coringa(")"), NULL, NULL);
+        $$->attribute = $2->attribute;
     }
   | expbool AND expbool {
+        attr_exprbool * at = (attr_exprbool *) malloc(sizeof(attr_exprbool));
+        
+        at->type = "&";
+        at->code = NULL;
+        at->leftbool = (attr_exprbool *) $1->attribute;
+        at->rightbool = (attr_exprbool *) $3->attribute;
+        
         $$ = create_node(@1.first_line, nodo_and, "and", $1, coringa("&"), $3, NULL, NULL);
+        $$->attribute = at;
     }
   | expbool OR expbool {
+        attr_exprbool * at = (attr_exprbool *) malloc(sizeof(attr_exprbool));
+        
+        at->type = "|";
+        at->code = NULL;
+        at->leftbool = (attr_exprbool *) $1->attribute;
+        at->rightbool = (attr_exprbool *) $3->attribute;
+        
         $$ = create_node(@1.first_line, nodo_or, "or", $1, coringa("|"), $3, NULL, NULL);
+        $$->attribute = at;
     }
   | NOT expbool {
+        attr_exprbool * at = (attr_exprbool *) malloc(sizeof(attr_exprbool));
+
+        at->type = "!";
+        at->code = NULL;
+        at->leftbool = (attr_exprbool *) $2->attribute;
+        at->rightbool = NULL;
+        
         $$ = create_node(@1.first_line, nodo_not, "not", coringa("!"), $2, NULL, NULL);
+        $$->attribute = at;
     }
   | expr '>' expr {
         $$ = create_node(@1.first_line, nodo_sup, "sup", $1, coringa(">"), $3, NULL, NULL);
+        if (operation_bool((attr_exprbool **) &($$->attribute), ">", $1->attribute, $3->attribute))
+            return error(GET_ERROR);
     }
   | expr '<' expr {
         $$ = create_node(@1.first_line, nodo_inf, "inf", $1, coringa("<"),$3, NULL, NULL);
+        if (operation_bool((attr_exprbool **) &($$->attribute), "<", $1->attribute, $3->attribute))
+            return error(GET_ERROR);
     }
   | expr LE expr {
         $$ = create_node(@1.first_line, nodo_le, "le", $1, coringa("<="), $3, NULL, NULL);
+        if (operation_bool((attr_exprbool **) &($$->attribute), "<=", $1->attribute, $3->attribute))
+            return error(GET_ERROR);
     }
   | expr GE expr {
         $$ = create_node(@1.first_line, nodo_ge, "ge", $1, coringa(">="), $3, NULL, NULL);
+        if (operation_bool((attr_exprbool **) &($$->attribute), ">=", $1->attribute, $3->attribute))
+            return error(GET_ERROR);
     }
    | expr EQ expr {
         $$ = create_node(@1.first_line, nodo_eq, "eq", $1, coringa("=="), $3, NULL, NULL);
+        if (operation_bool((attr_exprbool **) &($$->attribute), "==", $1->attribute, $3->attribute))
+            return error(GET_ERROR);
     }
   | expr NE expr {
         $$ = create_node(@1.first_line, nodo_ne, "ne", $1, coringa("<>"), $3, NULL, NULL);
+        if (operation_bool((attr_exprbool **) &($$->attribute), "<>", $1->attribute, $3->attribute))
+            return error(GET_ERROR);
     }
 ;
 
@@ -542,6 +648,13 @@ expbool:
 
 int NaN(int type) {
     return type == CHAR_TYPE; // not a number
+}
+int isBool(char * operator) {
+    int i;
+    for (i = 0; i < BOOL_LENGHT; i++)
+        if (!strcmp(operator, bool[i]))
+            return 1;
+    return 0;
 }
 const char * itoa(int value) {
     static char buffer [33];
@@ -601,21 +714,89 @@ void insert_nodes(Node * ntype, Node * nvar) {
     }
 }
 
+// IFBOOL
+void ifbool(attr * at, attr_exprbool * at_bool, int invert, char * label_ok, char * label_er) {
+    int i;
+    char * type = malloc(sizeof(char) * 3);
+    strcpy(type, at_bool->type);
+    if (invert) { 
+        /*
+            NOT (a AND b)   --> (NOT a) OR (NOT b)
+            1 <> 2          --> 1 == 2
+            1 > 2           --> 1 <= 2
+        */
+        for (i = 0; i < BOOL_LENGHT; i++)
+            if (!strcmp(type, bool[i])) {
+                strcpy(type, bool[i + (i % 2 ? -1 : 1)]);
+                break;
+            }
+    }
+    cat_tac(&(at->code), &(at_bool->code));
+
+    // NOT
+    if (!strcmp("!", type)) {
+        ifbool(at, at_bool->leftbool, !invert, label_ok, label_er); 
+    // OR, AND
+    } else if (strstr("&|!", type)) {
+        char * label_inner;
+        // OR
+        if (!strcmp(type, "|")) {
+            label_temp(&label_inner, "IN");
+            ifbool(at, at_bool->leftbool, invert, label_ok, label_inner);
+        // AND
+        } else {
+            label_temp(&label_inner, "IN");
+            ifbool(at, at_bool->leftbool, invert, label_inner, label_er);
+        }
+        append_inst_tac(&(at->code), create_inst_tac("", label_inner, "LABEL", ""));
+        ifbool(at, at_bool->rightbool, invert, label_ok, label_er);
+    // >, <=, <, >=, ==, <>
+    } else {
+        char * expr = malloc(sizeof(char) * (strlen(at_bool->left) + 5 + strlen(at_bool->right) + 1));
+        sprintf(expr, "%s %s %s", at_bool->left, type, at_bool->right);
+        
+        append_inst_tac(&(at->code), create_inst_tac("", expr, "IF", label_ok));
+        append_inst_tac(&(at->code), create_inst_tac("", label_er, "GOTO", ""));
+    }
+}
+
 // OPERATION: add sub mul div
 int operation(attr_expr ** ret, char * type, attr_expr * left, attr_expr * right) {
+    if(NaN(left->type) || NaN(right->type))
+        return error(TYPE_MISMATCH_ERROR);
+    
     attr_expr * at = (attr_expr *) malloc(sizeof(attr_expr));
     * ret = at;
     at->code = left->code;
     cat_tac(&(at->code), &(right->code));
-
-    if(NaN(left->type) || NaN(right->type))
-        return error(TYPE_MISMATCH_ERROR);
     
     if(left->type == INT_TYPE && right->type == INT_TYPE) {
         at->type = INT_TYPE;
         address(&(at->value), rx_temp(INT_TYPE), RX);
         append_inst_tac(&(at->code), create_inst_tac(at->value, left->value, type, right->value));
     }
+    
+    // TODO: FLOAT
+    return 0;
+}
+
+// OPERATION_BOOL
+int operation_bool(attr_exprbool ** ret, char * type, attr_expr * left, attr_expr * right) {
+    if(NaN(left->type) || NaN(right->type))
+        return error(TYPE_MISMATCH_ERROR);
+    
+    attr_exprbool * at = (attr_exprbool *) malloc(sizeof(attr_exprbool));
+    * ret = at;
+    at->code = left->code;
+    cat_tac(&(at->code), &(right->code));
+    
+    if(left->type == INT_TYPE && right->type == INT_TYPE) {
+        at->type = malloc(sizeof(char) * 3);
+        at->type = type;
+        at->left = left->value;
+        at->right = right->value;
+    }
+    
     // TODO: FLOAT
     return 0;
 }
@@ -631,6 +812,15 @@ int rx_temp(int type) {
         case DOUBLE_TYPE:   tmp += DOUBLE_SIZE; break;
     }
     return ret;
+}
+
+// LABEL TEMP
+void label_temp(char **  ret, char * type) {
+    static int tmp = 0;
+    tmp++;
+    char * str = malloc(sizeof(char) * 8);
+    sprintf(str, "_%s_%03d", type, tmp);
+    * ret = str;
 }
 
 // ERROR

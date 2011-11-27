@@ -38,7 +38,7 @@ typedef struct {
 
 /* ACOES */
 
-typedef struct attr {
+typedef struct {
     struct node_tac *code;
 } attr;
 
@@ -48,20 +48,16 @@ typedef struct {
     struct node_tac *code;
 } attr_expr;
 
+typedef struct attr_exprbool{
+    char *type;
+    char *left;
+    char *right;
+    struct node_tac *code;
+    struct attr_exprbool *leftbool;
+    struct attr_exprbool *rightbool;
+} attr_exprbool;
+
 typedef struct {
     attr_expr ** expr;
     int lenght;
 } attr_listaexpr;
-
-
-/*informações sobre o array a serem armazenadas no campo extra da tabela de
- * símbolos
-typedef struct array_attr_t{
-    int c; /*constante pré-calculada
-    int nd; /*número de dimensões
-    int *size; /*tamanho das dimensões
-  //  int *inicio; /*início das dimensões
-    int w;  /*tamanho de cada elemento
-} array_attr_t; */
-
-

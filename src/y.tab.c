@@ -150,13 +150,24 @@
 
     #define SP "SP"
     #define RX "Rx"
+    
+    #define BOOL_LENGHT 8
+    char bool[BOOL_LENGHT][3] = {
+        "<",    ">=",
+        ">",    "<=", 
+        "==",   "!=",
+        "&",    "|"
+    };
 
     const char * itoa(int);
     void address(char **, int, char *);
 
     void insert_nodes(Node *, Node *);
+    void ifbool(attr *, attr_exprbool *, int, char *, char *);
     int operation(attr_expr **, char *, attr_expr *, attr_expr *);
-    int rx_temp(int type);
+    int operation_bool(attr_exprbool **, char *, attr_expr *, attr_expr *);
+    int rx_temp(int);
+    void label_temp(char **, char *);
 
     int errorValue;
     int error(int);
@@ -184,13 +195,13 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 39 "pico.y"
+#line 50 "pico.y"
 {
   struct _node * no;
   char* string;
 }
 /* Line 193 of yacc.c.  */
-#line 194 "y.tab.c"
+#line 205 "y.tab.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -215,7 +226,7 @@ typedef struct YYLTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 219 "y.tab.c"
+#line 230 "y.tab.c"
 
 #ifdef short
 # undef short
@@ -525,12 +536,12 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   104,   104,   108,   114,   117,   123,   130,   133,   139,
-     144,   152,   159,   166,   173,   183,   195,   207,   219,   234,
-     248,   271,   275,   287,   302,   309,   321,   373,   382,   400,
-     405,   410,   415,   420,   424,   432,   440,   455,   461,   467,
-     474,   482,   485,   491,   494,   500,   503,   506,   509,   512,
-     515,   518,   521,   524,   527,   530,   533
+       0,   115,   115,   119,   125,   128,   134,   141,   144,   150,
+     155,   163,   170,   177,   184,   194,   206,   218,   230,   245,
+     259,   282,   286,   298,   313,   320,   332,   384,   393,   411,
+     416,   421,   426,   431,   435,   443,   451,   466,   472,   478,
+     485,   493,   538,   544,   548,   555,   565,   575,   579,   590,
+     601,   612,   617,   622,   627,   632,   637
 };
 #endif
 
@@ -1537,7 +1548,7 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 104 "pico.y"
+#line 115 "pico.y"
     {
         syntax_tree = (yyval.no) = create_node((yylsp[(1) - (2)]).first_line, nodo_programa, "code", (yyvsp[(1) - (2)].no), (yyvsp[(2) - (2)].no), NULL, NULL);
         (yyval.no)->attribute = (yyvsp[(2) - (2)].no)->attribute;
@@ -1545,28 +1556,28 @@ yyreduce:
     break;
 
   case 3:
-#line 108 "pico.y"
+#line 119 "pico.y"
     { 
         syntax_tree = (yyval.no) = (yyvsp[(1) - (1)].no);
     }
     break;
 
   case 4:
-#line 114 "pico.y"
+#line 125 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (2)]).first_line, nodo_declaracoes, "declaracoes", (yyvsp[(1) - (2)].no), coringa(";"), NULL, NULL); 
     }
     break;
 
   case 5:
-#line 117 "pico.y"
+#line 128 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_declaracoes, "declaracoes", (yyvsp[(1) - (3)].no), (yyvsp[(2) - (3)].no), coringa(";"), NULL, NULL);
     }
     break;
 
   case 6:
-#line 123 "pico.y"
+#line 134 "pico.y"
     {
         insert_nodes((Node *)(yyvsp[(1) - (3)].no), (Node *)(yyvsp[(3) - (3)].no));
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_declaracao, "declaracao", (yyvsp[(1) - (3)].no), coringa(":"), (yyvsp[(3) - (3)].no), NULL, NULL);
@@ -1574,21 +1585,21 @@ yyreduce:
     break;
 
   case 7:
-#line 130 "pico.y"
+#line 141 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (1)]).first_line, nodo_idf, (yyvsp[(1) - (1)].string), NULL, NULL);
     }
     break;
 
   case 8:
-#line 133 "pico.y"
+#line 144 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_listadeclaracao, "listadeclaracao", create_node((yylsp[(1) - (3)]).first_line, nodo_idf, (yyvsp[(1) - (3)].string), NULL, NULL), coringa(","), (yyvsp[(3) - (3)].no), NULL, NULL);
     }
     break;
 
   case 9:
-#line 139 "pico.y"
+#line 150 "pico.y"
     {
         //$$ = create_node(@1.first_line, nodo_tipo, "tipo", $1, NULL, NULL);
         //$$->attribute = $1->attribute;
@@ -1597,7 +1608,7 @@ yyreduce:
     break;
 
   case 10:
-#line 144 "pico.y"
+#line 155 "pico.y"
     {
         //$$ = create_node(@1.first_line, nodo_tipo, "tipo", $1, NULL, NULL);
         //$$->attribute = $1->attribute;
@@ -1606,7 +1617,7 @@ yyreduce:
     break;
 
   case 11:
-#line 152 "pico.y"
+#line 163 "pico.y"
     {
         attr_tipounico * at = malloc(sizeof(attr_tipounico));
         at->type = INT_TYPE;
@@ -1617,7 +1628,7 @@ yyreduce:
     break;
 
   case 12:
-#line 159 "pico.y"
+#line 170 "pico.y"
     {
         attr_tipounico * at = malloc(sizeof(attr_tipounico));
         at->type = DOUBLE_TYPE;
@@ -1628,7 +1639,7 @@ yyreduce:
     break;
 
   case 13:
-#line 166 "pico.y"
+#line 177 "pico.y"
     {
         attr_tipounico * at = malloc(sizeof(attr_tipounico));
         at->type = REAL_TYPE;
@@ -1639,7 +1650,7 @@ yyreduce:
     break;
 
   case 14:
-#line 173 "pico.y"
+#line 184 "pico.y"
     {
         attr_tipounico * at = malloc(sizeof(attr_tipounico));
         at->type = CHAR_TYPE;
@@ -1650,7 +1661,7 @@ yyreduce:
     break;
 
   case 15:
-#line 183 "pico.y"
+#line 194 "pico.y"
     {
         attr_tipolista * at = malloc(sizeof(attr_tipolista));
         attr_listadupla * at_inner = ((attr_listadupla *) (yyvsp[(3) - (4)].no)->attribute);
@@ -1666,7 +1677,7 @@ yyreduce:
     break;
 
   case 16:
-#line 195 "pico.y"
+#line 206 "pico.y"
     {
         attr_tipolista * at = malloc(sizeof(attr_tipolista));
         attr_listadupla * at_inner = ((attr_listadupla *) (yyvsp[(3) - (4)].no)->attribute);
@@ -1682,7 +1693,7 @@ yyreduce:
     break;
 
   case 17:
-#line 207 "pico.y"
+#line 218 "pico.y"
     {
         attr_tipolista * at = malloc(sizeof(attr_tipolista));
         attr_listadupla * at_inner = ((attr_listadupla *) (yyvsp[(3) - (4)].no)->attribute);
@@ -1698,7 +1709,7 @@ yyreduce:
     break;
 
   case 18:
-#line 219 "pico.y"
+#line 230 "pico.y"
     {
         attr_tipolista * at = malloc(sizeof(attr_tipolista));
         attr_listadupla * at_inner = ((attr_listadupla *) (yyvsp[(3) - (4)].no)->attribute);
@@ -1714,7 +1725,7 @@ yyreduce:
     break;
 
   case 19:
-#line 234 "pico.y"
+#line 245 "pico.y"
     {
         attr_listadupla * at = malloc(sizeof(attr_listadupla));
 
@@ -1732,7 +1743,7 @@ yyreduce:
     break;
 
   case 20:
-#line 248 "pico.y"
+#line 259 "pico.y"
     {
         attr_listadupla * at = malloc(sizeof(attr_listadupla));
         attr_listadupla * at_last = ((attr_listadupla *) (yyvsp[(5) - (5)].no)->attribute);
@@ -1756,7 +1767,7 @@ yyreduce:
     break;
 
   case 21:
-#line 271 "pico.y"
+#line 282 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (2)]).first_line, nodo_acoes, "acoes", (yyvsp[(1) - (2)].no), coringa(";"), NULL, NULL);
         (yyval.no)->attribute = (yyvsp[(1) - (2)].no)->attribute;
@@ -1764,7 +1775,7 @@ yyreduce:
     break;
 
   case 22:
-#line 275 "pico.y"
+#line 286 "pico.y"
     {
         attr * at = (attr *) malloc(sizeof(attr));
         at->code = NULL;
@@ -1777,7 +1788,7 @@ yyreduce:
     break;
 
   case 23:
-#line 287 "pico.y"
+#line 298 "pico.y"
     {
         attr * at = (attr *) malloc(sizeof(attr));
         attr_expr * left = ((attr_expr *) (yyvsp[(1) - (3)].no)->attribute);
@@ -1796,7 +1807,7 @@ yyreduce:
     break;
 
   case 24:
-#line 302 "pico.y"
+#line 313 "pico.y"
     { 
         (yyval.no) = create_node((yylsp[(1) - (1)]).first_line, nodo_comando, "comando", (yyvsp[(1) - (1)].no), NULL, NULL);
         (yyval.no)->attribute = (yyvsp[(1) - (1)].no)->attribute;
@@ -1804,7 +1815,7 @@ yyreduce:
     break;
 
   case 25:
-#line 309 "pico.y"
+#line 320 "pico.y"
     {
         attr_expr *at = malloc(sizeof(attr_expr));
         entry_t * e = lookup(s_table, (yyvsp[(1) - (1)].string));
@@ -1820,7 +1831,7 @@ yyreduce:
     break;
 
   case 26:
-#line 321 "pico.y"
+#line 332 "pico.y"
     {
         attr_expr *at = malloc(sizeof(attr_expr));
         attr_listaexpr * at_lista = ((attr_listaexpr *) (yyvsp[(3) - (4)].no)->attribute);
@@ -1873,7 +1884,7 @@ yyreduce:
     break;
 
   case 27:
-#line 373 "pico.y"
+#line 384 "pico.y"
     {
         attr_listaexpr *at = malloc(sizeof(attr_listaexpr));
         at->lenght = 1;
@@ -1886,7 +1897,7 @@ yyreduce:
     break;
 
   case 28:
-#line 382 "pico.y"
+#line 393 "pico.y"
     {
         attr_listaexpr * at = malloc(sizeof(attr_listaexpr));
         attr_listaexpr * at_last = ((attr_listaexpr *) (yyvsp[(3) - (3)].no)->attribute);
@@ -1905,7 +1916,7 @@ yyreduce:
     break;
 
   case 29:
-#line 400 "pico.y"
+#line 411 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_mais, "+", (yyvsp[(1) - (3)].no), coringa("+"), (yyvsp[(3) - (3)].no), NULL, NULL);
         if (operation((attr_expr **) &((yyval.no)->attribute), "ADD", (yyvsp[(1) - (3)].no)->attribute, (yyvsp[(3) - (3)].no)->attribute))
@@ -1914,7 +1925,7 @@ yyreduce:
     break;
 
   case 30:
-#line 405 "pico.y"
+#line 416 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_menos, "-", (yyvsp[(1) - (3)].no), coringa("-"), (yyvsp[(3) - (3)].no), NULL, NULL);
         if (operation((attr_expr **) &((yyval.no)->attribute), "SUB", (yyvsp[(1) - (3)].no)->attribute, (yyvsp[(3) - (3)].no)->attribute))
@@ -1923,7 +1934,7 @@ yyreduce:
     break;
 
   case 31:
-#line 410 "pico.y"
+#line 421 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_multiplicacao, "*", (yyvsp[(1) - (3)].no), coringa("*"), (yyvsp[(3) - (3)].no), NULL, NULL);
         if (operation((attr_expr **) &((yyval.no)->attribute), "MUL", (yyvsp[(1) - (3)].no)->attribute, (yyvsp[(3) - (3)].no)->attribute))
@@ -1932,7 +1943,7 @@ yyreduce:
     break;
 
   case 32:
-#line 415 "pico.y"
+#line 426 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_divisao, "/", (yyvsp[(1) - (3)].no), coringa("/"), (yyvsp[(3) - (3)].no), NULL, NULL);
         if (operation((attr_expr **) &((yyval.no)->attribute), "DIV", (yyvsp[(1) - (3)].no)->attribute, (yyvsp[(3) - (3)].no)->attribute))
@@ -1941,7 +1952,7 @@ yyreduce:
     break;
 
   case 33:
-#line 420 "pico.y"
+#line 431 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_expressao, "()", coringa("("), (yyvsp[(2) - (3)].no), coringa(")"), NULL, NULL);
         (yyval.no)->attribute = (yyvsp[(2) - (3)].no)->attribute;
@@ -1949,7 +1960,7 @@ yyreduce:
     break;
 
   case 34:
-#line 424 "pico.y"
+#line 435 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (1)]).first_line, nodo_int, (yyvsp[(1) - (1)].string), NULL, NULL);
         attr_expr * at = malloc(sizeof(attr_expr));
@@ -1961,7 +1972,7 @@ yyreduce:
     break;
 
   case 35:
-#line 432 "pico.y"
+#line 443 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (1)]).first_line, nodo_float, (yyvsp[(1) - (1)].string), NULL, NULL);
         attr_expr * at = malloc(sizeof(attr_expr));
@@ -1973,7 +1984,7 @@ yyreduce:
     break;
 
   case 36:
-#line 440 "pico.y"
+#line 451 "pico.y"
     {
         attr_expr * at = malloc(sizeof(attr_expr));
         attr_expr * at_lvalue = (attr_expr *) (yyvsp[(1) - (1)].no)->attribute;
@@ -1981,9 +1992,9 @@ yyreduce:
         
         at->type = at_lvalue->type;
         at->code = at_lvalue->code;
-        append_inst_tac(&(at->code), create_inst_tac(res, at_lvalue->value, ":=", ""));
         
         address(&res, rx_temp(INT_TYPE), RX);
+        append_inst_tac(&(at->code), create_inst_tac(res, at_lvalue->value, ":=", ""));
         at->value = res;
         
         (yyval.no) = create_node((yylsp[(1) - (1)]).first_line, nodo_expr, "expr", (yyvsp[(1) - (1)].no), NULL, NULL);
@@ -1992,21 +2003,21 @@ yyreduce:
     break;
 
   case 37:
-#line 455 "pico.y"
+#line 466 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (1)]).first_line, nodo_expr, "expr", (yyvsp[(1) - (1)].no), NULL, NULL);
     }
     break;
 
   case 38:
-#line 461 "pico.y"
+#line 472 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (4)]).first_line, nodo_proc, "chamaproc", create_node((yylsp[(1) - (4)]).first_line, nodo_idf, (yyvsp[(1) - (4)].string), NULL, NULL), coringa("("), (yyvsp[(3) - (4)].no), coringa(")"), NULL, NULL);
     }
     break;
 
   case 39:
-#line 467 "pico.y"
+#line 478 "pico.y"
     {
         attr * at = (attr *) malloc(sizeof(attr));
         at->code = ((attr_expr *) (yyvsp[(1) - (1)].no)->attribute)->code;
@@ -2017,11 +2028,11 @@ yyreduce:
     break;
 
   case 40:
-#line 474 "pico.y"
+#line 485 "pico.y"
     {
         attr * at = (attr *) malloc(sizeof(attr));
         at->code = ((attr_expr *) (yyvsp[(3) - (4)].no)->attribute)->code;
-        append_inst_tac(&(at->code), create_inst_tac("", "", "PRINT", ((attr_expr *) (yyvsp[(3) - (4)].no)->attribute)->value));
+        append_inst_tac(&(at->code), create_inst_tac("", ((attr_expr *) (yyvsp[(3) - (4)].no)->attribute)->value, "PRINT", ""));
 
         (yyval.no) = create_node((yylsp[(1) - (4)]).first_line, nodo_printf, "print", (yyvsp[(3) - (4)].no), NULL, NULL);
         (yyval.no)->attribute = at;
@@ -2029,120 +2040,215 @@ yyreduce:
     break;
 
   case 41:
-#line 482 "pico.y"
+#line 493 "pico.y"
     {
+        attr * at = (attr *) malloc(sizeof(attr));
+        attr_exprbool * at_bool = (attr_exprbool *) (yyvsp[(3) - (7)].no)->attribute;
+        attr * at_acoes = (attr *) (yyvsp[(6) - (7)].no)->attribute;
+        at->code = NULL;
+        
+        /*
+            a AND b                         a OR b
+                IF a GOTO label_inner           IF a GOTO label_ok
+                GOTO label_er                   [GOTO label_inner]
+              label_inner:                    label_inner:
+                IF b GOTO label_ok              IF b GOTO label_ok
+                GOTO label_er                   GOTO label_er
+              label_ok:                       label_ok:
+                TRUE                            TRUE
+              label_er:                       label_er:
+                FALSE                           FALSE
+        */
+        
+        char * label_ok, * label_er, * label_end;
+        label_temp(&label_ok, "OK");
+        label_temp(&label_er, "ER");
+        
+        ifbool(at, at_bool, 0, label_ok, label_er);
+        
+        append_inst_tac(&(at->code), create_inst_tac("", label_ok, "LABEL", ""));
+        cat_tac(&(at->code), &(at_acoes->code));
+        
+        // jump else
+        if ((yyvsp[(7) - (7)].no)->attribute) {
+            label_temp(&label_end, "XX");
+            append_inst_tac(&(at->code), create_inst_tac("", label_end, "GOTO", ""));
+        }
+        append_inst_tac(&(at->code), create_inst_tac("", label_er, "LABEL", ""));
+        
+        // else
+        if ((yyvsp[(7) - (7)].no)->attribute) {
+            attr * at_acoes_else = (attr *) (yyvsp[(7) - (7)].no)->attribute;
+            cat_tac(&(at->code), &(at_acoes_else->code));
+            append_inst_tac(&(at->code), create_inst_tac("", label_end, "LABEL", ""));
+        }
+        
         (yyval.no) = create_node((yylsp[(1) - (7)]).first_line, nodo_if, "if", coringa("("), (yyvsp[(3) - (7)].no), coringa(")"), coringa("then"), (yyvsp[(6) - (7)].no), (yyvsp[(7) - (7)].no), NULL, NULL);
+        (yyval.no)->attribute = at;
     }
     break;
 
   case 42:
-#line 485 "pico.y"
+#line 538 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (7)]).first_line, nodo_while, "while", coringa("("), (yyvsp[(3) - (7)].no), coringa(")"), coringa("{"), (yyvsp[(6) - (7)].no), coringa("}"), NULL, NULL);
     }
     break;
 
   case 43:
-#line 491 "pico.y"
+#line 544 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (1)]).first_line, nodo_end, "end", NULL, NULL);
+        (yyval.no)->attribute = NULL;
     }
     break;
 
   case 44:
-#line 494 "pico.y"
+#line 548 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_else, "else", (yyvsp[(2) - (3)].no), create_node((yylsp[(1) - (3)]).first_line, nodo_end, "end", NULL, NULL), NULL, NULL);
+        (yyval.no)->attribute = (yyvsp[(2) - (3)].no)->attribute;
     }
     break;
 
   case 45:
-#line 500 "pico.y"
-    {
+#line 555 "pico.y"
+    { // 1 == 1
+        attr_exprbool * at = (attr_exprbool *) malloc(sizeof(attr_exprbool));
+        
+        at->type = "==";
+        at->code = NULL;
+        at->left = at->right = "1";
+        
         (yyval.no) = create_node((yylsp[(1) - (1)]).first_line, nodo_true, "true", NULL, NULL);
+        (yyval.no)->attribute = at;
     }
     break;
 
   case 46:
-#line 503 "pico.y"
-    {
+#line 565 "pico.y"
+    { // 1 <> 1
+        attr_exprbool * at = (attr_exprbool *) malloc(sizeof(attr_exprbool));
+        
+        at->type = "<>";
+        at->code = NULL;
+        at->left = at->right = "1";
+        
         (yyval.no) = create_node((yylsp[(1) - (1)]).first_line, nodo_false, "false", NULL, NULL);
+        (yyval.no)->attribute = at;
     }
     break;
 
   case 47:
-#line 506 "pico.y"
+#line 575 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_expressao, "()", coringa("("), (yyvsp[(2) - (3)].no), coringa(")"), NULL, NULL);
+        (yyval.no)->attribute = (yyvsp[(2) - (3)].no)->attribute;
     }
     break;
 
   case 48:
-#line 509 "pico.y"
+#line 579 "pico.y"
     {
+        attr_exprbool * at = (attr_exprbool *) malloc(sizeof(attr_exprbool));
+        
+        at->type = "&";
+        at->code = NULL;
+        at->leftbool = (attr_exprbool *) (yyvsp[(1) - (3)].no)->attribute;
+        at->rightbool = (attr_exprbool *) (yyvsp[(3) - (3)].no)->attribute;
+        
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_and, "and", (yyvsp[(1) - (3)].no), coringa("&"), (yyvsp[(3) - (3)].no), NULL, NULL);
+        (yyval.no)->attribute = at;
     }
     break;
 
   case 49:
-#line 512 "pico.y"
+#line 590 "pico.y"
     {
+        attr_exprbool * at = (attr_exprbool *) malloc(sizeof(attr_exprbool));
+        
+        at->type = "|";
+        at->code = NULL;
+        at->leftbool = (attr_exprbool *) (yyvsp[(1) - (3)].no)->attribute;
+        at->rightbool = (attr_exprbool *) (yyvsp[(3) - (3)].no)->attribute;
+        
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_or, "or", (yyvsp[(1) - (3)].no), coringa("|"), (yyvsp[(3) - (3)].no), NULL, NULL);
+        (yyval.no)->attribute = at;
     }
     break;
 
   case 50:
-#line 515 "pico.y"
+#line 601 "pico.y"
     {
+        attr_exprbool * at = (attr_exprbool *) malloc(sizeof(attr_exprbool));
+
+        at->type = "!";
+        at->code = NULL;
+        at->leftbool = (attr_exprbool *) (yyvsp[(2) - (2)].no)->attribute;
+        at->rightbool = NULL;
+        
         (yyval.no) = create_node((yylsp[(1) - (2)]).first_line, nodo_not, "not", coringa("!"), (yyvsp[(2) - (2)].no), NULL, NULL);
+        (yyval.no)->attribute = at;
     }
     break;
 
   case 51:
-#line 518 "pico.y"
+#line 612 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_sup, "sup", (yyvsp[(1) - (3)].no), coringa(">"), (yyvsp[(3) - (3)].no), NULL, NULL);
+        if (operation_bool((attr_exprbool **) &((yyval.no)->attribute), ">", (yyvsp[(1) - (3)].no)->attribute, (yyvsp[(3) - (3)].no)->attribute))
+            return error(GET_ERROR);
     }
     break;
 
   case 52:
-#line 521 "pico.y"
+#line 617 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_inf, "inf", (yyvsp[(1) - (3)].no), coringa("<"),(yyvsp[(3) - (3)].no), NULL, NULL);
+        if (operation_bool((attr_exprbool **) &((yyval.no)->attribute), "<", (yyvsp[(1) - (3)].no)->attribute, (yyvsp[(3) - (3)].no)->attribute))
+            return error(GET_ERROR);
     }
     break;
 
   case 53:
-#line 524 "pico.y"
+#line 622 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_le, "le", (yyvsp[(1) - (3)].no), coringa("<="), (yyvsp[(3) - (3)].no), NULL, NULL);
+        if (operation_bool((attr_exprbool **) &((yyval.no)->attribute), "<=", (yyvsp[(1) - (3)].no)->attribute, (yyvsp[(3) - (3)].no)->attribute))
+            return error(GET_ERROR);
     }
     break;
 
   case 54:
-#line 527 "pico.y"
+#line 627 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_ge, "ge", (yyvsp[(1) - (3)].no), coringa(">="), (yyvsp[(3) - (3)].no), NULL, NULL);
+        if (operation_bool((attr_exprbool **) &((yyval.no)->attribute), ">=", (yyvsp[(1) - (3)].no)->attribute, (yyvsp[(3) - (3)].no)->attribute))
+            return error(GET_ERROR);
     }
     break;
 
   case 55:
-#line 530 "pico.y"
+#line 632 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_eq, "eq", (yyvsp[(1) - (3)].no), coringa("=="), (yyvsp[(3) - (3)].no), NULL, NULL);
+        if (operation_bool((attr_exprbool **) &((yyval.no)->attribute), "==", (yyvsp[(1) - (3)].no)->attribute, (yyvsp[(3) - (3)].no)->attribute))
+            return error(GET_ERROR);
     }
     break;
 
   case 56:
-#line 533 "pico.y"
+#line 637 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_ne, "ne", (yyvsp[(1) - (3)].no), coringa("<>"), (yyvsp[(3) - (3)].no), NULL, NULL);
+        if (operation_bool((attr_exprbool **) &((yyval.no)->attribute), "<>", (yyvsp[(1) - (3)].no)->attribute, (yyvsp[(3) - (3)].no)->attribute))
+            return error(GET_ERROR);
     }
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 2146 "y.tab.c"
+#line 2252 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2362,13 +2468,20 @@ yyreturn:
 }
 
 
-#line 539 "pico.y"
+#line 645 "pico.y"
 
  /* A partir daqui, insere-se qlqer codigo C necessario.
   */
 
 int NaN(int type) {
     return type == CHAR_TYPE; // not a number
+}
+int isBool(char * operator) {
+    int i;
+    for (i = 0; i < BOOL_LENGHT; i++)
+        if (!strcmp(operator, bool[i]))
+            return 1;
+    return 0;
 }
 const char * itoa(int value) {
     static char buffer [33];
@@ -2428,21 +2541,89 @@ void insert_nodes(Node * ntype, Node * nvar) {
     }
 }
 
+// IFBOOL
+void ifbool(attr * at, attr_exprbool * at_bool, int invert, char * label_ok, char * label_er) {
+    int i;
+    char * type = malloc(sizeof(char) * 3);
+    strcpy(type, at_bool->type);
+    if (invert) { 
+        /*
+            NOT (a AND b)   --> (NOT a) OR (NOT b)
+            1 <> 2          --> 1 == 2
+            1 > 2           --> 1 <= 2
+        */
+        for (i = 0; i < BOOL_LENGHT; i++)
+            if (!strcmp(type, bool[i])) {
+                strcpy(type, bool[i + (i % 2 ? -1 : 1)]);
+                break;
+            }
+    }
+    cat_tac(&(at->code), &(at_bool->code));
+
+    // NOT
+    if (!strcmp("!", type)) {
+        ifbool(at, at_bool->leftbool, !invert, label_ok, label_er); 
+    // OR, AND
+    } else if (strstr("&|!", type)) {
+        char * label_inner;
+        // OR
+        if (!strcmp(type, "|")) {
+            label_temp(&label_inner, "IN");
+            ifbool(at, at_bool->leftbool, invert, label_ok, label_inner);
+        // AND
+        } else {
+            label_temp(&label_inner, "IN");
+            ifbool(at, at_bool->leftbool, invert, label_inner, label_er);
+        }
+        append_inst_tac(&(at->code), create_inst_tac("", label_inner, "LABEL", ""));
+        ifbool(at, at_bool->rightbool, invert, label_ok, label_er);
+    // >, <=, <, >=, ==, <>
+    } else {
+        char * expr = malloc(sizeof(char) * (strlen(at_bool->left) + 5 + strlen(at_bool->right) + 1));
+        sprintf(expr, "%s %s %s", at_bool->left, type, at_bool->right);
+        
+        append_inst_tac(&(at->code), create_inst_tac("", expr, "IF", label_ok));
+        append_inst_tac(&(at->code), create_inst_tac("", label_er, "GOTO", ""));
+    }
+}
+
 // OPERATION: add sub mul div
 int operation(attr_expr ** ret, char * type, attr_expr * left, attr_expr * right) {
+    if(NaN(left->type) || NaN(right->type))
+        return error(TYPE_MISMATCH_ERROR);
+    
     attr_expr * at = (attr_expr *) malloc(sizeof(attr_expr));
     * ret = at;
     at->code = left->code;
     cat_tac(&(at->code), &(right->code));
-
-    if(NaN(left->type) || NaN(right->type))
-        return error(TYPE_MISMATCH_ERROR);
     
     if(left->type == INT_TYPE && right->type == INT_TYPE) {
         at->type = INT_TYPE;
         address(&(at->value), rx_temp(INT_TYPE), RX);
         append_inst_tac(&(at->code), create_inst_tac(at->value, left->value, type, right->value));
     }
+    
+    // TODO: FLOAT
+    return 0;
+}
+
+// OPERATION_BOOL
+int operation_bool(attr_exprbool ** ret, char * type, attr_expr * left, attr_expr * right) {
+    if(NaN(left->type) || NaN(right->type))
+        return error(TYPE_MISMATCH_ERROR);
+    
+    attr_exprbool * at = (attr_exprbool *) malloc(sizeof(attr_exprbool));
+    * ret = at;
+    at->code = left->code;
+    cat_tac(&(at->code), &(right->code));
+    
+    if(left->type == INT_TYPE && right->type == INT_TYPE) {
+        at->type = malloc(sizeof(char) * 3);
+        at->type = type;
+        at->left = left->value;
+        at->right = right->value;
+    }
+    
     // TODO: FLOAT
     return 0;
 }
@@ -2458,6 +2639,15 @@ int rx_temp(int type) {
         case DOUBLE_TYPE:   tmp += DOUBLE_SIZE; break;
     }
     return ret;
+}
+
+// LABEL TEMP
+void label_temp(char **  ret, char * type) {
+    static int tmp = 0;
+    tmp++;
+    char * str = malloc(sizeof(char) * 8);
+    sprintf(str, "_%s_%03d", type, tmp);
+    * ret = str;
 }
 
 // ERROR

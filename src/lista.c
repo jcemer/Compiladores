@@ -24,11 +24,18 @@ struct tac* create_inst_tac(const char* res, const char* arg1, const char* op, c
  * @param i a instrucao a ser impressa.
  */
 void print_inst_tac(FILE* out, struct tac i) {
+    // ATTR
     if (!strcmp(i.op, ":="))
         fprintf(out, "%s := %s\n", i.res, i.arg1);
     // PRINT
-    else if (* i.arg1 == '\0')
-        fprintf(out, "%s %s\n", i.op, i.arg2);
+    else if (!strcmp(i.op, "PRINT"))
+        fprintf(out, "%s %s\n", i.op, i.arg1);
+    // GOTO
+    else if (!strcmp(i.op, "GOTO"))
+        fprintf(out, "GOTO %s\n", i.arg1);
+    // IF
+    else if (!strcmp(i.op, "IF"))
+        fprintf(out, "IF %s GOTO %s\n", i.arg1, i.arg2);
     else
         fprintf(out, "%s := %s %s %s\n", i.res, i.arg1, i.op, i.arg2);
 }
@@ -50,8 +57,12 @@ void print_inst_tac(FILE* out, struct tac i) {
  */
 void print_tac(FILE* out, struct node_tac * code) {
     while (code) {
-        fprintf(out, "%03d:   ", code->number);
-        print_inst_tac(out, *code->inst);
+        if (!strcmp(code->inst->op, "LABEL"))
+            fprintf(out, "%s:\n", code->inst->arg1);
+        else {
+            fprintf(out, "%03d:   ", code->number);
+            print_inst_tac(out, *code->inst);
+        }
         code = code->next;
     }
 }
@@ -66,23 +77,29 @@ void append_inst_tac(struct node_tac ** code, struct tac * inst) {
 }
 
 void cat_tac(struct node_tac ** code_a, struct node_tac ** code_b) {
-    int i = 1;
+    int i = 0;
     struct node_tac * temp = * code_a;
 
     if (* code_b) {
         if (* code_a) {
-            while (temp->next) {
-               temp = temp->next;
-               i++;
-            }
+            do {
+                if (!strcmp(temp->inst->op, "LABEL"))
+                    temp->number = -1;
+                else
+                    temp->number = i++;
+            } while (temp->next && (temp = temp->next));
+            
             temp->next = *code_b;
             (* code_b)->prev = temp;
             temp = * code_b;
             do {
-                temp->number = i++;
+                if (!strcmp(temp->inst->op, "LABEL"))
+                   temp->number = -1;
+               else
+                    temp->number = i++;
             } while (temp = temp->next);
         } else {
-           * code_a = * code_b;
+            * code_a = * code_b;
         }
     }
 }
