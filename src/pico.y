@@ -453,6 +453,8 @@ expr:
         attr_expr * at_lvalue = (attr_expr *) $1->attribute;
         char * res;
         
+        /* DO ONLY WITH ARRAY */
+        
         at->type = at_lvalue->type;
         at->code = at_lvalue->code;
         
@@ -461,7 +463,7 @@ expr:
         at->value = res;
         
         $$ = create_node(@1.first_line, nodo_expr, "expr", $1, NULL, NULL);
-        $$->attribute = $1->attribute; //at;
+        $$->attribute = at; // $1->attribute;
     }
   | chamaproc {
         $$ = create_node(@1.first_line, nodo_expr, "expr", $1, NULL, NULL);
