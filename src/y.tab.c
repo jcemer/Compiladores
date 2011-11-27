@@ -163,7 +163,7 @@
     void address(char **, int, char *);
 
     void insert_nodes(Node *, Node *);
-    void ifbool(attr *, attr_exprbool *, int, char *, char *);
+    void booleans(attr *, attr_exprbool *, int, char *, char *);
     int operation(attr_expr **, char *, attr_expr *, attr_expr *);
     int operation_bool(attr_exprbool **, char *, attr_expr *, attr_expr *);
     int rx_temp(int);
@@ -540,8 +540,8 @@ static const yytype_uint16 yyrline[] =
      155,   163,   170,   177,   184,   194,   206,   218,   230,   245,
      259,   282,   286,   298,   313,   320,   332,   384,   393,   411,
      416,   421,   426,   431,   435,   443,   451,   466,   472,   478,
-     485,   493,   538,   544,   548,   555,   565,   575,   579,   590,
-     601,   612,   617,   622,   627,   632,   637
+     485,   493,   538,   563,   567,   574,   584,   594,   598,   609,
+     620,   631,   636,   641,   646,   651,   656
 };
 #endif
 
@@ -1998,7 +1998,7 @@ yyreduce:
         at->value = res;
         
         (yyval.no) = create_node((yylsp[(1) - (1)]).first_line, nodo_expr, "expr", (yyvsp[(1) - (1)].no), NULL, NULL);
-        (yyval.no)->attribute = at;
+        (yyval.no)->attribute = (yyvsp[(1) - (1)].no)->attribute; //at;
     }
     break;
 
@@ -2064,7 +2064,7 @@ yyreduce:
         label_temp(&label_ok, "OK");
         label_temp(&label_er, "ER");
         
-        ifbool(at, at_bool, 0, label_ok, label_er);
+        booleans(at, at_bool, 0, label_ok, label_er);
         
         append_inst_tac(&(at->code), create_inst_tac("", label_ok, "LABEL", ""));
         cat_tac(&(at->code), &(at_acoes->code));
@@ -2074,8 +2074,8 @@ yyreduce:
             label_temp(&label_end, "XX");
             append_inst_tac(&(at->code), create_inst_tac("", label_end, "GOTO", ""));
         }
-        append_inst_tac(&(at->code), create_inst_tac("", label_er, "LABEL", ""));
         
+        append_inst_tac(&(at->code), create_inst_tac("", label_er, "LABEL", ""));
         // else
         if ((yyvsp[(7) - (7)].no)->attribute) {
             attr * at_acoes_else = (attr *) (yyvsp[(7) - (7)].no)->attribute;
@@ -2091,12 +2091,31 @@ yyreduce:
   case 42:
 #line 538 "pico.y"
     {
+        attr * at = (attr *) malloc(sizeof(attr));
+        attr_exprbool * at_bool = (attr_exprbool *) (yyvsp[(3) - (7)].no)->attribute;
+        attr * at_acoes = (attr *) (yyvsp[(6) - (7)].no)->attribute;
+        at->code = NULL;
+        
+        char * label_wh, * label_ok, * label_er;
+        label_temp(&label_wh, "WH");
+        label_temp(&label_ok, "OK");
+        label_temp(&label_er, "ER");
+        
+        append_inst_tac(&(at->code), create_inst_tac("", label_wh, "LABEL", ""));
+        booleans(at, at_bool, 0, label_ok, label_er);
+        
+        append_inst_tac(&(at->code), create_inst_tac("", label_ok, "LABEL", ""));
+        cat_tac(&(at->code), &(at_acoes->code));
+        append_inst_tac(&(at->code), create_inst_tac("", label_wh, "GOTO", ""));
+        append_inst_tac(&(at->code), create_inst_tac("", label_er, "LABEL", ""));
+        
         (yyval.no) = create_node((yylsp[(1) - (7)]).first_line, nodo_while, "while", coringa("("), (yyvsp[(3) - (7)].no), coringa(")"), coringa("{"), (yyvsp[(6) - (7)].no), coringa("}"), NULL, NULL);
+        (yyval.no)->attribute = at;
     }
     break;
 
   case 43:
-#line 544 "pico.y"
+#line 563 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (1)]).first_line, nodo_end, "end", NULL, NULL);
         (yyval.no)->attribute = NULL;
@@ -2104,7 +2123,7 @@ yyreduce:
     break;
 
   case 44:
-#line 548 "pico.y"
+#line 567 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_else, "else", (yyvsp[(2) - (3)].no), create_node((yylsp[(1) - (3)]).first_line, nodo_end, "end", NULL, NULL), NULL, NULL);
         (yyval.no)->attribute = (yyvsp[(2) - (3)].no)->attribute;
@@ -2112,7 +2131,7 @@ yyreduce:
     break;
 
   case 45:
-#line 555 "pico.y"
+#line 574 "pico.y"
     { // 1 == 1
         attr_exprbool * at = (attr_exprbool *) malloc(sizeof(attr_exprbool));
         
@@ -2126,7 +2145,7 @@ yyreduce:
     break;
 
   case 46:
-#line 565 "pico.y"
+#line 584 "pico.y"
     { // 1 <> 1
         attr_exprbool * at = (attr_exprbool *) malloc(sizeof(attr_exprbool));
         
@@ -2140,7 +2159,7 @@ yyreduce:
     break;
 
   case 47:
-#line 575 "pico.y"
+#line 594 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_expressao, "()", coringa("("), (yyvsp[(2) - (3)].no), coringa(")"), NULL, NULL);
         (yyval.no)->attribute = (yyvsp[(2) - (3)].no)->attribute;
@@ -2148,7 +2167,7 @@ yyreduce:
     break;
 
   case 48:
-#line 579 "pico.y"
+#line 598 "pico.y"
     {
         attr_exprbool * at = (attr_exprbool *) malloc(sizeof(attr_exprbool));
         
@@ -2163,7 +2182,7 @@ yyreduce:
     break;
 
   case 49:
-#line 590 "pico.y"
+#line 609 "pico.y"
     {
         attr_exprbool * at = (attr_exprbool *) malloc(sizeof(attr_exprbool));
         
@@ -2178,7 +2197,7 @@ yyreduce:
     break;
 
   case 50:
-#line 601 "pico.y"
+#line 620 "pico.y"
     {
         attr_exprbool * at = (attr_exprbool *) malloc(sizeof(attr_exprbool));
 
@@ -2193,7 +2212,7 @@ yyreduce:
     break;
 
   case 51:
-#line 612 "pico.y"
+#line 631 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_sup, "sup", (yyvsp[(1) - (3)].no), coringa(">"), (yyvsp[(3) - (3)].no), NULL, NULL);
         if (operation_bool((attr_exprbool **) &((yyval.no)->attribute), ">", (yyvsp[(1) - (3)].no)->attribute, (yyvsp[(3) - (3)].no)->attribute))
@@ -2202,7 +2221,7 @@ yyreduce:
     break;
 
   case 52:
-#line 617 "pico.y"
+#line 636 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_inf, "inf", (yyvsp[(1) - (3)].no), coringa("<"),(yyvsp[(3) - (3)].no), NULL, NULL);
         if (operation_bool((attr_exprbool **) &((yyval.no)->attribute), "<", (yyvsp[(1) - (3)].no)->attribute, (yyvsp[(3) - (3)].no)->attribute))
@@ -2211,7 +2230,7 @@ yyreduce:
     break;
 
   case 53:
-#line 622 "pico.y"
+#line 641 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_le, "le", (yyvsp[(1) - (3)].no), coringa("<="), (yyvsp[(3) - (3)].no), NULL, NULL);
         if (operation_bool((attr_exprbool **) &((yyval.no)->attribute), "<=", (yyvsp[(1) - (3)].no)->attribute, (yyvsp[(3) - (3)].no)->attribute))
@@ -2220,7 +2239,7 @@ yyreduce:
     break;
 
   case 54:
-#line 627 "pico.y"
+#line 646 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_ge, "ge", (yyvsp[(1) - (3)].no), coringa(">="), (yyvsp[(3) - (3)].no), NULL, NULL);
         if (operation_bool((attr_exprbool **) &((yyval.no)->attribute), ">=", (yyvsp[(1) - (3)].no)->attribute, (yyvsp[(3) - (3)].no)->attribute))
@@ -2229,7 +2248,7 @@ yyreduce:
     break;
 
   case 55:
-#line 632 "pico.y"
+#line 651 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_eq, "eq", (yyvsp[(1) - (3)].no), coringa("=="), (yyvsp[(3) - (3)].no), NULL, NULL);
         if (operation_bool((attr_exprbool **) &((yyval.no)->attribute), "==", (yyvsp[(1) - (3)].no)->attribute, (yyvsp[(3) - (3)].no)->attribute))
@@ -2238,7 +2257,7 @@ yyreduce:
     break;
 
   case 56:
-#line 637 "pico.y"
+#line 656 "pico.y"
     {
         (yyval.no) = create_node((yylsp[(1) - (3)]).first_line, nodo_ne, "ne", (yyvsp[(1) - (3)].no), coringa("<>"), (yyvsp[(3) - (3)].no), NULL, NULL);
         if (operation_bool((attr_exprbool **) &((yyval.no)->attribute), "<>", (yyvsp[(1) - (3)].no)->attribute, (yyvsp[(3) - (3)].no)->attribute))
@@ -2248,7 +2267,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 2252 "y.tab.c"
+#line 2271 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2468,7 +2487,7 @@ yyreturn:
 }
 
 
-#line 645 "pico.y"
+#line 664 "pico.y"
 
  /* A partir daqui, insere-se qlqer codigo C necessario.
   */
@@ -2542,7 +2561,7 @@ void insert_nodes(Node * ntype, Node * nvar) {
 }
 
 // IFBOOL
-void ifbool(attr * at, attr_exprbool * at_bool, int invert, char * label_ok, char * label_er) {
+void booleans(attr * at, attr_exprbool * at_bool, int invert, char * label_ok, char * label_er) {
     int i;
     char * type = malloc(sizeof(char) * 3);
     strcpy(type, at_bool->type);
@@ -2562,21 +2581,19 @@ void ifbool(attr * at, attr_exprbool * at_bool, int invert, char * label_ok, cha
 
     // NOT
     if (!strcmp("!", type)) {
-        ifbool(at, at_bool->leftbool, !invert, label_ok, label_er); 
+        booleans(at, at_bool->leftbool, !invert, label_ok, label_er); 
     // OR, AND
-    } else if (strstr("&|!", type)) {
+    } else if (strstr("&|", type)) {
         char * label_inner;
+        label_temp(&label_inner, "IN");
         // OR
-        if (!strcmp(type, "|")) {
-            label_temp(&label_inner, "IN");
-            ifbool(at, at_bool->leftbool, invert, label_ok, label_inner);
+        if (!strcmp(type, "|"))
+            booleans(at, at_bool->leftbool, invert, label_ok, label_inner);
         // AND
-        } else {
-            label_temp(&label_inner, "IN");
-            ifbool(at, at_bool->leftbool, invert, label_inner, label_er);
-        }
+        else
+            booleans(at, at_bool->leftbool, invert, label_inner, label_er);
         append_inst_tac(&(at->code), create_inst_tac("", label_inner, "LABEL", ""));
-        ifbool(at, at_bool->rightbool, invert, label_ok, label_er);
+        booleans(at, at_bool->rightbool, invert, label_ok, label_er);
     // >, <=, <, >=, ==, <>
     } else {
         char * expr = malloc(sizeof(char) * (strlen(at_bool->left) + 5 + strlen(at_bool->right) + 1));

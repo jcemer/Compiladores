@@ -35,7 +35,7 @@
     void address(char **, int, char *);
 
     void insert_nodes(Node *, Node *);
-    void ifbool(attr *, attr_exprbool *, int, char *, char *);
+    void booleans(attr *, attr_exprbool *, int, char *, char *);
     int operation(attr_expr **, char *, attr_expr *, attr_expr *);
     int operation_bool(attr_exprbool **, char *, attr_expr *, attr_expr *);
     int rx_temp(int);
@@ -461,7 +461,7 @@ expr:
         at->value = res;
         
         $$ = create_node(@1.first_line, nodo_expr, "expr", $1, NULL, NULL);
-        $$->attribute = at;
+        $$->attribute = $1->attribute; //at;
     }
   | chamaproc {
         $$ = create_node(@1.first_line, nodo_expr, "expr", $1, NULL, NULL);
@@ -513,7 +513,7 @@ enunciado:
         label_temp(&label_ok, "OK");
         label_temp(&label_er, "ER");
         
-        ifbool(at, at_bool, 0, label_ok, label_er);
+        booleans(at, at_bool, 0, label_ok, label_er);
         
         append_inst_tac(&(at->code), create_inst_tac("", label_ok, "LABEL", ""));
         cat_tac(&(at->code), &(at_acoes->code));
@@ -523,8 +523,8 @@ enunciado:
             label_temp(&label_end, "XX");
             append_inst_tac(&(at->code), create_inst_tac("", label_end, "GOTO", ""));
         }
-        append_inst_tac(&(at->code), create_inst_tac("", label_er, "LABEL", ""));
         
+        append_inst_tac(&(at->code), create_inst_tac("", label_er, "LABEL", ""));
         // else
         if ($7->attribute) {
             attr * at_acoes_else = (attr *) $7->attribute;
@@ -536,7 +536,26 @@ enunciado:
         $$->attribute = at;
     }
   | WHILE '(' expbool ')' '{' acoes '}' {
+        attr * at = (attr *) malloc(sizeof(attr));
+        attr_exprbool * at_bool = (attr_exprbool *) $3->attribute;
+        attr * at_acoes = (attr *) $6->attribute;
+        at->code = NULL;
+        
+        char * label_wh, * label_ok, * label_er;
+        label_temp(&label_wh, "WH");
+        label_temp(&label_ok, "OK");
+        label_temp(&label_er, "ER");
+        
+        append_inst_tac(&(at->code), create_inst_tac("", label_wh, "LABEL", ""));
+        booleans(at, at_bool, 0, label_ok, label_er);
+        
+        append_inst_tac(&(at->code), create_inst_tac("", label_ok, "LABEL", ""));
+        cat_tac(&(at->code), &(at_acoes->code));
+        append_inst_tac(&(at->code), create_inst_tac("", label_wh, "GOTO", ""));
+        append_inst_tac(&(at->code), create_inst_tac("", label_er, "LABEL", ""));
+        
         $$ = create_node(@1.first_line, nodo_while, "while", coringa("("), $3, coringa(")"), coringa("{"), $6, coringa("}"), NULL, NULL);
+        $$->attribute = at;
     }
 ;
 
@@ -715,7 +734,7 @@ void insert_nodes(Node * ntype, Node * nvar) {
 }
 
 // IFBOOL
-void ifbool(attr * at, attr_exprbool * at_bool, int invert, char * label_ok, char * label_er) {
+void booleans(attr * at, attr_exprbool * at_bool, int invert, char * label_ok, char * label_er) {
     int i;
     char * type = malloc(sizeof(char) * 3);
     strcpy(type, at_bool->type);
@@ -735,21 +754,19 @@ void ifbool(attr * at, attr_exprbool * at_bool, int invert, char * label_ok, cha
 
     // NOT
     if (!strcmp("!", type)) {
-        ifbool(at, at_bool->leftbool, !invert, label_ok, label_er); 
+        booleans(at, at_bool->leftbool, !invert, label_ok, label_er); 
     // OR, AND
-    } else if (strstr("&|!", type)) {
+    } else if (strstr("&|", type)) {
         char * label_inner;
+        label_temp(&label_inner, "IN");
         // OR
-        if (!strcmp(type, "|")) {
-            label_temp(&label_inner, "IN");
-            ifbool(at, at_bool->leftbool, invert, label_ok, label_inner);
+        if (!strcmp(type, "|"))
+            booleans(at, at_bool->leftbool, invert, label_ok, label_inner);
         // AND
-        } else {
-            label_temp(&label_inner, "IN");
-            ifbool(at, at_bool->leftbool, invert, label_inner, label_er);
-        }
+        else
+            booleans(at, at_bool->leftbool, invert, label_inner, label_er);
         append_inst_tac(&(at->code), create_inst_tac("", label_inner, "LABEL", ""));
-        ifbool(at, at_bool->rightbool, invert, label_ok, label_er);
+        booleans(at, at_bool->rightbool, invert, label_ok, label_er);
     // >, <=, <, >=, ==, <>
     } else {
         char * expr = malloc(sizeof(char) * (strlen(at_bool->left) + 5 + strlen(at_bool->right) + 1));
