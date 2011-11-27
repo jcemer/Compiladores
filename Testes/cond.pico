@@ -1,0 +1,7 @@
+int:a;
+a = 1;
+if((true & true ) | true) then
+	a = 3;
+else
+	a = 12;
+end;

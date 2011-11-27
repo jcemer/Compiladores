@@ -1,0 +1,9 @@
+int :x,y;
+x = 10;
+y = 3;
+if (x>=11) then
+	print(x);
+	if (y>2) then
+		print(y);
+	end;
+end;
