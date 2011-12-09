@@ -1,0 +1,6 @@
+int : i;
+int : t;
+i = 0;
+t = 0;
+while (i <= 10) { t = t+1; i = i+1; } ;
+print( t );

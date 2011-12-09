@@ -1,0 +1,11 @@
+int(0:20) : a;
+int : i, t;
+i=1;
+while (i <= 20) { 
+   a[i] = 1 ;
+   if (i <> 10) then
+      a[i] = 2*a[i];
+   end;
+   i = i+1;
+} ;
+print( a[10] );

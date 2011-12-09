@@ -1,0 +1,11 @@
+int : i,t;
+i = 4;
+t = 0;
+if (i >= 0) then
+   if (i > 10) then
+      t = 10;
+   else
+      t = 5;
+   end;
+end;
+print( t );

@@ -1,0 +1,8 @@
+int: k,a;
+k=2;
+if (k == 1) then 
+   a = 3;
+else
+   a = k;
+end ;
+print(a);

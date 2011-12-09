@@ -1,0 +1,6 @@
+int :k,a;
+k=5;
+if (k == 5) then 
+   a = k;
+   print(a);
+end;
