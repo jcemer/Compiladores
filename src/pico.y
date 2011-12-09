@@ -837,8 +837,8 @@ int rx_temp(int type) {
 void label_temp(char **  ret, char * type) {
     static int tmp = 0;
     tmp++;
-    char * str = malloc(sizeof(char) * 8);
-    sprintf(str, "_%s_%03d", type, tmp);
+    char * str = malloc(sizeof(char) * 7);
+    sprintf(str, "%s_%03d", type, tmp);
     * ret = str;
 }
 
