@@ -583,10 +583,10 @@ expbool:
         $$ = create_node(@1.first_line, nodo_true, "true", NULL, NULL);
         $$->attribute = at;
     }
-  | FALSE { // 1 <> 1
+  | FALSE { // 1 != 1
         attr_exprbool * at = (attr_exprbool *) malloc(sizeof(attr_exprbool));
         
-        at->type = "<>";
+        at->type = "!=";
         at->code = NULL;
         at->left = at->right = "1";
         
@@ -657,7 +657,7 @@ expbool:
     }
   | expr NE expr {
         $$ = create_node(@1.first_line, nodo_ne, "ne", $1, coringa("<>"), $3, NULL, NULL);
-        if (operation_bool((attr_exprbool **) &($$->attribute), "<>", $1->attribute, $3->attribute))
+        if (operation_bool((attr_exprbool **) &($$->attribute), "!=", $1->attribute, $3->attribute))
             return error(GET_ERROR);
     }
 ;
@@ -743,7 +743,7 @@ void booleans(attr * at, attr_exprbool * at_bool, int invert, char * label_ok, c
     if (invert) { 
         /*
             NOT (a AND b)   --> (NOT a) OR (NOT b)
-            1 <> 2          --> 1 == 2
+            1 != 2          --> 1 == 2
             1 > 2           --> 1 <= 2
         */
         for (i = 0; i < BOOL_LENGHT; i++)
@@ -769,7 +769,7 @@ void booleans(attr * at, attr_exprbool * at_bool, int invert, char * label_ok, c
             booleans(at, at_bool->leftbool, invert, label_inner, label_er);
         append_inst_tac(&(at->code), create_inst_tac("", label_inner, "LABEL", ""));
         booleans(at, at_bool->rightbool, invert, label_ok, label_er);
-    // >, <=, <, >=, ==, <>
+    // >, <=, <, >=, ==, !=
     } else {
         char * expr = malloc(sizeof(char) * (strlen(at_bool->left) + 5 + strlen(at_bool->right) + 1));
         sprintf(expr, "%s %s %s", at_bool->left, type, at_bool->right);
